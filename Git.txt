@@ -1,6 +1,6 @@
 https://github.com/
 https://git-scm.com/book/ru/v2 - Книга «Pro Git» (на русском),
-https://learngitbranching.js.org/  - ТРЕНАЖЕР 0
+https://learngitbranching.js.org/  - ТРЕНАЖЕР 
 
 Настройка:	# Выполняется из любой директории
 git config --global user.name "<имя фамилия>"	#
@@ -35,7 +35,7 @@ git branch --list -v		# информацию о последних коммитах каждой из веток
 git push
 
 git pull --rebase		# скачивает из внешнего репозитория новые коммиты и добавляет их в локальный репозиторий.
-git clone https://github.com/Ritter00/hints.git		# Нельзя пушить, не дает изменять репозиторий на гитхаб
+git clone https://github.com/Ritter00/hints.git		# Для пуша ввести токен SSH и ввести пароль в браузере
 
 git log				# выводит историю коммитов
 
