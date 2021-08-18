@@ -1,6 +1,6 @@
 https://github.com/
 https://git-scm.com/book/ru/v2 - Книга «Pro Git» (на русском),
-https://learngitbranching.js.org/  - ТРЕНАЖЕР
+https://learngitbranching.js.org/  - ТРЕНАЖЕР 0
 
 Настройка:	# Выполняется из любой директории
 git config --global user.name "<имя фамилия>"	#
