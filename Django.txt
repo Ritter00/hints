@@ -1,0 +1,14 @@
+Сайт https://www.djangoproject.com/  	# следуем инструкциям
+
+python3 -m venv venv     # создаем виртуальное окружение, с названием "venv"
+venv\scripts\activate    # активируем его 
+pip3 install django      # устанавливаем Django
+python -m django-admin startproject project    # создаем пустой проект с названием project
+python manage.py runserver 	# запускаем пустой проект  # в браузере http://127.0.0.1:8000/ (локальный серв или Вместо 127.0.0.1 можете также прописать localhost)
+
+Создание пустых страниц:
+https://docs.djangoproject.com/en/3.1/ref/contrib/flatpages/     # не забыть from django.urls import path, include
+
+Создать админа:
+python manage.py migrate	# подготовка базы данных
+python manage.py createsuperuser 	# Далее назначаем ему имя, пароль на свой вкус и цвет. Адрес электронной почты можете оставить пустым, если хотите.
