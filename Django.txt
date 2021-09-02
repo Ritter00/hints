@@ -1,14 +1,59 @@
 Сайт https://www.djangoproject.com/  	# следуем инструкциям
+https://django.fun/docs/django/ru/3.1/	# документацияя на русском
 
-python3 -m venv venv     # создаем виртуальное окружение, с названием "venv"
+python -m venv venv     # создаем виртуальное окружение, с названием "venv"
 venv\scripts\activate    # активируем его 
 pip3 install django      # устанавливаем Django
-python -m django-admin startproject project    # создаем пустой проект с названием project
+django-admin startproject project    # создаем пустой проект с названием project или python -m django-admin startproject project
 python manage.py runserver 	# запускаем пустой проект  # в браузере http://127.0.0.1:8000/ (локальный серв или Вместо 127.0.0.1 можете также прописать localhost)
+python manage.py startapp news	# новое приложение news -добавить в установленные приложения settings.py и найдем там список INSTALLED_APPS
 
+_____________________________________________________________________________________________________________
 Создание пустых страниц:
 https://docs.djangoproject.com/en/3.1/ref/contrib/flatpages/     # не забыть from django.urls import path, include
+
+в Settings.py:
+import os			# импортировать os
+INSTALLED_APPS = ['...',
+'django.contrib.sites',
+'django.contrib.flatpages', ]	# Добавить эти приложения
+SITE_ID = 1			# добавить эту константу
+MIDDLEWARE = ['...',
+'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',	# добавить декоратор
+] 
+TEMPLATES = ['...',
+'DIRS': [os.path.join(BASE_DIR, 'templates')],		# изменить 'DIRS'=
+'...']
+STATICFILES_DIRS = [
+    BASE_DIR / "static"]	#
+
+Создать на уровне manage.py - templates/flatpages/default.html # default.html-шаблон и здесь все страницы
+
+Создать на уровне manage.py папку static # Сюда распаковать архив с CSS, JS , image - Bootstrap
+в самом начале HTML-файла дописать {% load static %}
+И перед каждой гиперссылкой или ресурсом надо просто писать тег {% static '.../..css' %}, а сам путь взять в кавычки
+
+в Urls.py:
+from django.urls import path, include # импортировать include
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('pages/', include('django.contrib.flatpages.urls')),] # добавить новый path
+
+________________________________________________________________________________________________________________
 
 Создать админа:
 python manage.py migrate	# подготовка базы данных
 python manage.py createsuperuser 	# Далее назначаем ему имя, пароль на свой вкус и цвет. Адрес электронной почты можете оставить пустым, если хотите.
+
+
+Миграции:
+python manage.py makemigrations	# созданиe миграций
+python manage.py migrate	# применениe миграций
+
+Запуск шелл:
+python manage.py shell		#
+
+Зарегистрировать созданные модели, иначе не увидим их в админке:(проект/приложение/admin.py, project/simpleapp/admin.py)
+from django.contrib import admin
+from .models import Category, Product 	# импортируем модели Category, Product
+admin.site.register(Category)	# также все модели
