@@ -5,6 +5,7 @@ python -m venv venv     # создаем виртуальное окружение, с названием "venv"
 venv\scripts\activate    # активируем его 
 pip3 install django      # устанавливаем Django
 django-admin startproject project    # создаем пустой проект с названием project или python -m django-admin startproject project
+django-admin startproject project .	# тоже, но сточкой создается в текущей папке
 python manage.py runserver 	# запускаем пустой проект  # в браузере http://127.0.0.1:8000/ (локальный серв или Вместо 127.0.0.1 можете также прописать localhost)
 python manage.py startapp news	# новое приложение news -добавить в установленные приложения settings.py и найдем там список INSTALLED_APPS
 
@@ -47,7 +48,7 @@ python manage.py createsuperuser 	# Далее назначаем ему имя, пароль на свой вкус
 
 
 Миграции:
-python manage.py makemigrations	# созданиe миграций
+python manage.py makemigrations	# созданиe миграций (модели)
 python manage.py migrate	# применениe миграций
 
 Запуск шелл:
@@ -57,3 +58,7 @@ python manage.py shell		#
 from django.contrib import admin
 from .models import Category, Product 	# импортируем модели Category, Product
 admin.site.register(Category)	# также все модели
+
+__________________________________________________________________________________________________________________
+Фильтры:
+pip3 install django-filter	# вписать 'django_filters' в INSTALLED_APPS в настройках
