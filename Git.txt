@@ -39,3 +39,9 @@ git clone https://github.com/Ritter00/hints.git		# Для пуша ввести токен SSH и в
 
 git log				# выводит историю коммитов
 
+Заменить локальный репозиторий на удаленный:
+git reset --hard origin/main
+git pull
+
+
+
