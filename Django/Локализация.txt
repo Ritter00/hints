@@ -32,3 +32,10 @@ string = _('Hello world')
 
 python manage.py makemessages -l ru  	#  ru - <код языка*>, file - django.po
 python manage.py compilemessages	#  файл — django.mo
+____________________________________________________________________________
+pip install django-modeltranslation	#  удобные переводы в моделях
+INSTALLED_APPS = [
+    'modeltranslation', # обязательно впишите его перед админом
+
+#  сделать миграции
+python manage.py update_translation_fields		#  Поскольку у нас уже были записи в базе данных, надо будет ввести команду
