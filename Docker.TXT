@@ -1,0 +1,28 @@
+https://badcode.ru/docker-tutorial-dlia-novichkov-rassmatrivaiem-docker-tak-iesli-by-on-byl-ighrovoi-pristavkoi/
+https://habr.com/ru/post/310460/
+
+
+docker pull ubuntu:18.10	# Скачать образ/IMAGE убунту 18.10 с Dockerhub.com (там много других образов)
+
+docker images			# список всех загруженных образов
+
+docker run ubuntu:18.10 echo 'hello from ubuntu'	# запустим наш первый контейнер Ubuntu
+docker run <image> <опциональная команды, которая выполнится внутри контейнера>
+
+docker ps			# списoк запущенных контейнеров
+docker ps -a			# список всех контейнеров без исключения
+
+docker run -it ubuntu:18.10 /bin/bash	# Опция -it вместе с /bin/bash даёт доступ к выполнению команд в терминале внутри контейнера Ubuntu
+docker run -it <IMAGE> /bin/bash
+
+exit 				# выйдет из контейнера, и вернётся в основную ОС
+
+docker start <CONTAINER_ID>	# запустить ранее созданный контейнер (example ~ docker start fe6107aefa90 )
+docker exec -it fe6107aefa90 /bin/bash	# доступ к выполнению команд в терминале внутри контейнера Ubuntu <CONTAINER_ID> - fe6107aefa90
+# exec позволяет выполнить команду внутри запущенного контейнера. В нашем случае, мы выполнили /bin/bash, что позволило нам подключиться к терминалу внутри контейнера
+
+docker stop <CONTAINER_ID>	# остановим активный контейнер
+docker rm <CONTAINER_ID>	# удалим контейнер
+
+# Потому, команду docker run очень часто запускают с дополнительным флагом --rm, который удаляет запущенный контейнер после работы:
+docker run -it --rm ubuntu:18.10 /bin/bash
