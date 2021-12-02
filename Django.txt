@@ -38,6 +38,8 @@ SITE_ID = 1			# добавить эту константу
 MIDDLEWARE = ['...',
 'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',	# добавить декоратор
 ] 
+
+_________________________________________________________________________________________________________________
 TEMPLATES = ['...',
 'DIRS': [os.path.join(BASE_DIR, 'templates')],		# изменить 'DIRS'=
 '...']
