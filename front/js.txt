@@ -1,0 +1,8 @@
+Современный учебник JavaScript
+https://learn.javascript.ru/
+
+Руководство JavaScript
+https://developer.mozilla.org/ru/docs/Web/JavaScript/Guide
+
+Узлы документа DOM
+https://dom.spec.whatwg.org/#node
