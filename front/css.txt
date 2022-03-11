@@ -1,5 +1,6 @@
 Справочник CSS
 https://html5book.ru/css-spravochnik.html
+https://www.w3schools.com/css/css_navbar_horizontal.asp 	#Рецепты CSS
 
 Встроенный CSS
 <тег style="название:значение">		#<a style="background: grey; padding: 10px 20px; color: green">Главная</a>
@@ -58,3 +59,14 @@ vh	1% от высоты viewport
 vmin	1% от меньшего измерения viewport
 vmax	1% от большего измерения viewport
 ________________________________________________________________________________________________________________________
+flex-box
+https://bureau.ru/bb/soviet/20170914/
+
+________________________________________________________________________________________________________________________
+:nth-child		#рецепты
+
+https://css-tricks.com/useful-nth-child-recipies/
+
+________________________________________________________________________________________________________________________
+Функции CSS
+https://css-tricks.com/complete-guide-to-css-functions/
