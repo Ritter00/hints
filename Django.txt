@@ -1,6 +1,7 @@
 —айт https://www.djangoproject.com/  	# следуем инструкци€м
 https://django.fun/docs/django/ru/3.1/	# документаци€€ на русском
 https://djbook.ru/ch01.html
+https://djangodoc.ru/
 
 python -m venv venv     	# создаем виртуальное окружение, с названием "venv"
 venv\scripts\activate    	# активируем его 
