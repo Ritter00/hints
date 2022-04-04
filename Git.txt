@@ -1,10 +1,16 @@
 https://github.com/
 https://git-scm.com/book/ru/v2 - Книга «Pro Git» (на русском),
 https://learngitbranching.js.org/  - ТРЕНАЖЕР 
+https://bogdanov-blog.ru/generatsiya-ssh-klyuchej-dlya-github/ 	#создание ключей SSH
 
 Настройка:	# Выполняется из любой директории
-git config --global user.name "<имя фамилия>"	#
-git config --global user.email "<ваш емейл>"	#
+git config --global user.name "John Doe"	#
+git config --global user.email johndoe@example.com	#
+Если для каких-то отдельных проектов вы хотите указать другое имя или электронную почту, можно выполнить эту же команду без параметра --global в каталоге с нужным проектом.
+git config --list	# проверить используемую конфигурацию
+git config user.name	# проверить значение конкретного ключа
+
+
 
 git init			# Инициализировать папку как Git-репозиторий
 git status			# проверить статус, в котором находится ваш репозиторий
