@@ -29,3 +29,5 @@ docker rm <CONTAINER_ID>	# удалим контейнер
 
 # Потому, команду docker run очень часто запускают с дополнительным флагом --rm, который удаляет запущенный контейнер после работы:
 docker run -it --rm ubuntu:18.10 /bin/bash
+
+Docker system prune -a		# Очистка всего и сразу

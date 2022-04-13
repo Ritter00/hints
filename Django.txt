@@ -97,3 +97,9 @@ pip freeze > requirments.txt   	#  создаем файл с импортами
 pip install -r requirments.txt	# устанавливаем все модули из этого файла
 
 ____________________________________________________________________________________________________________________
+docker-compose down -v	# сбросить миграции
+docker-compose exec web python manage.py makemigrations
+docker-compose exec web python manage.py migrate
+
+docker-compose up --force-recreate
+docker-compose exec web python manage.py shell

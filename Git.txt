@@ -37,8 +37,18 @@ git merge awesome-branch	# вливаем в ветку, в которой находимся ветку awesome-br
 git branch -d awesome-branch	# удалить ветку awesome-branch
 git branch --list		# список веток
 git branch --list -v		# информацию о последних коммитах каждой из веток
+__________________________________________________________
+git stash save			#Можно удалить  изменения, но они сохраняться в карман stash (git stash save <message> или git stash save 'wip: refactoring')
+git stash list			#чтобы посмотреть, что у нас есть в stash
+git stash apply stash@{0}	#забрать последние изменение из stash (из конкретного stash@{0} - или так "stash@{n}")
+git stash pop			#забрать последние изменение из stash и удалить
+git stash show -p		#сводку различий в stash (git stash show stash@{1})
+git stash drop <stash_id>	#удалить сохраненный stash
+git stash clear			#удалить всё в stash из репозитория
+
 
 git push
+git push --set-upstream origin DS-180 	# запушить новую ветку DS-180 и отслеживать ее
 
 git pull --rebase		# скачивает из внешнего репозитория новые коммиты и добавляет их в локальный репозиторий.
 git clone https://github.com/Ritter00/hints.git		# Для пуша ввести токен SSH и ввести пароль в браузере

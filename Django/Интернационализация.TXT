@@ -1,0 +1,21 @@
+файл settings.py, в нём обязательно должна быть данная строчка:
+USE_I18N = True
+установить утилиту для переводов — gettext:
+sudo apt-get install gettext
+
+RUN apk --update add \
+    build-base \
+    jpeg-dev \
+    zlib-dev \
+    gettext \
+    gettext-dev 	# dockerfile
+
+в настройки также добавить строчку:
+LOCALE_PATH = [os.path.join(BASE_DIR, 'locale')]
+
+в ШАБЛОНах обернуть {% trans 'word' %} и вкаждом шаблоне {% load i18n %}
+
+python manage.py makemessages -l ru	#делаем перевод, вместо ru -(en - и др. можно ставить)~ docker-compose exec web django-admin makemessages -l en
+django-admin makemessages -l en		# то же
+Затем записываем в сгенерированный файл django.po перевод 
+python manage.py compilemessages	# компилируем этот перевод(django-admin compilemessages). ~ docker-compose exec web django-admin compilemessages

@@ -1,0 +1,2 @@
+https://docs.microsoft.com/en-us/windows/wsl/setup/environment
+\\wsl$	# все доступные дистрибутивы Linux и их корневые файловые системы в проводнике Windows, в адресной строке введите

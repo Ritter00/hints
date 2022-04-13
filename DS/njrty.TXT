@@ -1,0 +1,15 @@
+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
+hJfy7mJ8bUraQWx - aleh.zimnokha@aimtalk.me
+admin3@admin.admin - vber#%TverASF6
+https://habr.com/ru/post/341704/
+
+docker-compose down -v	# сбросить миграции
+docker-compose build
+docker-compose up
+docker-compose exec web python manage.py makemigrations		# во втором терминале
+docker-compose exec web python manage.py migrate
+
+docker-compose up --force-recreate
+docker-compose exec web python manage.py shell
+from accounts.models import Account
+Account.objects.all()
