@@ -2,6 +2,13 @@ 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
 hJfy7mJ8bUraQWx - aleh.zimnokha@aimtalk.me
 admin3@admin.admin - vber#%TverASF6
 https://habr.com/ru/post/341704/
+https://vh82.hoster.by:2083/ - хостинг
+visemby
+Aesae1ia
+visemby13
+kWYFZ+ZwzD?%
+visemby14
+2N^ODZ!gvQD*
 
 docker-compose down -v	# сбросить миграции
 docker-compose build
@@ -13,3 +20,12 @@ docker-compose up --force-recreate
 docker-compose exec web python manage.py shell
 from accounts.models import Account
 Account.objects.all()
+
+sudo chmod 777 db_django	#права удалить папку
+
+docker stop $(docker ps -a -q)
+docker rm $(docker ps -a -q)
+docker system prune --volumes	#очистить образы
+
+cat backup.sql | docker exec -i f32a47f9f2fc /usr/bin/mysql -u root --password=password db_django 	# загрузить дамп памяти backup.sql
+docker exec CONTAINER /usr/bin/mysqldump -u root --password=root db_django > backup.sql		# перезаписать дамп памяти backup.sql
