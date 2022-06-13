@@ -22,10 +22,34 @@ from accounts.models import Account
 Account.objects.all()
 
 sudo chmod 777 db_django	#права удалить папку
+sudo rm -r db_django/
 
 docker stop $(docker ps -a -q)
 docker rm $(docker ps -a -q)
 docker system prune --volumes	#очистить образы
 
-cat backup.sql | docker exec -i f32a47f9f2fc /usr/bin/mysql -u root --password=password db_django 	# загрузить дамп памяти backup.sql
-docker exec CONTAINER /usr/bin/mysqldump -u root --password=root db_django > backup.sql		# перезаписать дамп памяти backup.sql
+cat dump07_06_22.sql | docker exec -i 945cb1dc8ecc /usr/bin/mysql -u root --password=password db_django 	# загрузить дамп памяти backup.sql
+cat backup_17_may_2022..sql | docker exec -i 4decc1a1be46 /usr/bin/mysql -u root --password=password db_django
+docker exec 0d5a544509f7 /usr/bin/mysqldump -u root --password=password db_django > backup_10_may_2022.sql		# перезаписать дамп памяти backup.sql
+docker exec 1c4bba058f81 /usr/bin/mysqldump -u root --password=password db_django > backup_6_june_2022_adr.sql
+
+mysqldump --no-tablespaces -u visemby_visem_dev --password=visem_a1zahOeR9kcef visemby_dev > dump07_06_22.sql  # сделать дамп БД на дев-висем
+
+send_mail('subject', 'body of the message', 'postmaster@mail.deliverysolution.site', ['django.test.ds.183@gmail.co'])
+________________________________________________
+docker-compose exec web python manage.py shell
+import datetime
+from addresses.models import City
+from addresses.models import Address
+from addresses.models import WorkingDays
+from addresses.models import Contact
+
+---Деплой Висем------------------------------------serve
+source /home/visemby/virtualenv/dev.visem.by/3.8/bin/activate && cd /home/visemby/dev.visem.by	#виртульное окр
+git pull origin dev
+ssh password на хостинге - visem
+python manage.py migrate
+pip install -r requirements.txt
+затем перезагружаешь приложение и обнуляешь passenger
+git restore passenger_wsgi.py
+-----------------------------------------------------------------

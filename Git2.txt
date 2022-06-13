@@ -1,0 +1,71 @@
+https://github.com/
+https://git-scm.com/book/ru/v2 - Книга «Pro Git» (на русском),
+https://learngitbranching.js.org/ - ТРЕНАЖЕР
+https://bogdanov-blog.ru/generatsiya-ssh-klyuchej-dlya-github/ #создание ключей SSH
+
+Настройка: # Выполняется из любой директории
+git config --global user.name "Джон Доу" #
+git config --global user.email johndoe@example.com #
+Если вы хотите указать другое имя или электронную почту, вы можете указать ту же команду без параметра --global в каталоге с нужным проектом.
+git config --list # проверяемую настройку
+git config user.name # проверка значения выбора ключа
+
+
+
+git init # Инициализировать папку как Git-репозиторий
+git status # проверить статус, в котором находится ваш репозиторий
+
+Интеграция с github.com # ВАЖНО, чтобы репозиторий создавался пустым, поэтому не отмечайте галочки, добавляющие файлы.
+git удаленное добавление источника https://github.com/Ritter00/hints.git
+или # выберите SSH
+git удаленное добавление источника git@github.com:Ritter00/hints.git
+ветка git -M главная
+git push -u происхождение основной
+
+
+
+git branch # Посмотреть какая ветка, В новых версиях Git ветка master может быть по умолчанию переименована в main,Если у вас ветка main, работать с ней следует аналогично ветке master.
+git add -A # добавить все файлы, находящиеся в каталогах
+git add this.js # ДОБАВИТЬ отдельный файл this.js
+git commit -m "Комментарий" #команда, которая создаёт коммит с рядом параметров, Флаг -m означает, что следует за сообщением
+git commit --amend # выбранные изменения будут добавлены в последний коммит. Команда также требует открытия системного текстового редактора для внесения изменений в сообщение коммита. Эта команда часто используется, если была допущена ошибка.
+
+
+git branch awesome-branch # создадим новую ветку awesome-branch
+git checkout awesome-branch # перейти на Существующую ветку awesome-branch Терминал фиксирует результат сообщения:Переключился на ветку 'awesome-branch'
+git merge awesome-branch # вливаем в ветку, в которую входит ветку awesome-branch
+git branch -d awesome-branch # удалить ветку awesome-branch
+git branch -D awesome-branch
+git branch --list # список веток
+git branch --list -v # информация о последних коммитах каждого из веток
+____________________________________________________________
+git stash save #Можно удалить изменения, но они меняются в карманном stash (git stash save <message> или git stash save 'wip: refactoring')
+git stash list #чтобы посмотреть, что у нас есть в тайнике
+git stash apply stash@{0} #забрать последние изменения из stash (из значений stash@{0} - или так "stash@{n}")
+git stash pop #забрать последние изменения из stash и удалить
+git stash show -p #сводку различных в stash (git stash show stash@{1})
+git stash drop <stash_id> #удалить сохраненный тайник
+git stash clear #удалить всё в stash из репозитория
+
+
+git push
+git push --set-upstream origin DS-180 # запушить новую ветку DS-180 и дождаться ее
+
+git pull --rebase # скачивает из внешнего репозитория новые коммиты и производит их в локальном репозитории.
+git clone https://github.com/Ritter00/hints.git # Для запуска введите токен SSH и введите пароль в
+
+git log # выводит историю коммитов
+git log --oneline --all #Вывести все комитеты в ветке в том числе и те, которые были позже встречены
+
+Заменить локальный репозиторий на удаленный:
+git reset --hard origin/main
+git pull
+________________________________________________________________________________________________________________
+запусть HTML
+http://raw.githack.com/
+________________________________
+SSH-ключ
+$ ssh-keygen #создать ключ
+$ eval `ssh-agent`
+$ ssh-add ~/.ssh/id_rsa #Добавьте ключ в ssh-агент
+$ cat ~/.ssh/id_rsa.pub #Добавьте открытый ключ в свою учетную запись.
