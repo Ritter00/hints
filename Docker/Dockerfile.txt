@@ -1,0 +1,25 @@
+ Какие инструкции нам потребуются:
+
+FROM — базовый образ.
+RUN — выполнение команды в образе при его сборке.
+ENV — установка переменной окружения.
+WORKDIR — установка рабочей директории.
+VOLUME — создание общей папки.
+CMD — выполнение команды при запуске контейнера.
+
+-------------------------------------
+FROM ubuntu:latest
+RUN apt-get update
+RUN apt-get install -y nginx
+COPY ./mysite.conf /etc/nginx/sites-enabled/mysite.local.conf
+WORKDIR /data
+VOLUME /data
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+---------------------------------------
+В той же директории, что и Dockerfile запустите команду:
+docker build -t nginx.test .
+
+build — создать контейнер,
+t — имя контейнера nginx.test,
+. — путь к Dockerfile. И да, Dockerfile должен именно так называться.

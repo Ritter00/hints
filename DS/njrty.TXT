@@ -1,14 +1,5 @@
-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
-hJfy7mJ8bUraQWx - aleh.zimnokha@aimtalk.me
-admin3@admin.admin - vber#%TverASF6
 https://habr.com/ru/post/341704/
 https://vh82.hoster.by:2083/ - хостинг
-visemby
-Aesae1ia
-visemby13
-kWYFZ+ZwzD?%
-visemby14
-2N^ODZ!gvQD*
 
 docker-compose down -v	# сбросить миграции
 docker-compose build
@@ -44,10 +35,13 @@ from addresses.models import Address
 from addresses.models import WorkingDays
 from addresses.models import Contact
 
+from shop.api_v2.serializers import CategorySerializerV2
+from management.models import Category
+c = Category.objects.all().last()
 ---Деплой Висем------------------------------------serve
 source /home/visemby/virtualenv/dev.visem.by/3.8/bin/activate && cd /home/visemby/dev.visem.by	#виртульное окр
 git pull origin dev
-ssh password на хостинге - visem
+ssh password на хостинге - 
 python manage.py migrate
 pip install -r requirements.txt
 затем перезагружаешь приложение и обнуляешь passenger
