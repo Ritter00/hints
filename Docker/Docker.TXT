@@ -1,39 +1,46 @@
 ﻿https://badcode.ru/docker-tutorial-dlia-novichkov-rassmatrivaiem-docker-tak-iesli-by-on-byl-ighrovoi-pristavkoi/
-https://habr.com/ru/post/310460/
+https://habr.com/ru/post/310460/  # Полное практическое руководство по Docker: с нуля до кластера на AWS
 https://medium.com/nuances-of-programming/%D0%BC%D0%BE%D1%89%D0%BD%D0%B5%D0%B9%D1%88%D0%B8%D0%B9-%D1%81%D0%BF%D0%B8%D1%81%D0%BE%D0%BA-%D0%BA%D0%BE%D0%BC%D0%B0%D0%BD%D0%B4-%D0%B2-docker-b2a22747de12
 https://timeweb.com/ru/community/articles/osnovnye-komandy-docker
 
 
-
+----------------------------
 docker pull ubuntu:18.10	# Скачать образ/IMAGE убунту 18.10 с Dockerhub.com (там много других образов)
-
-docker images			# список всех загруженных образов
-
-docker run ubuntu:18.10 echo 'hello from ubuntu'	# запустим наш первый контейнер Ubuntu
-docker run <image> <опциональная команды, которая выполнится внутри контейнера>
-
+docker build -t nginx.test .	# Создать образ nginx.test на основании Dockerfile из текущей директории
 docker ps			# списoк запущенных контейнеров
 docker ps -a			# список всех контейнеров без исключения
+docker images			# список всех загруженных образов
+docker image ls
+docker volume
+docker network ls		# список сетей
 
+docker cp webserver:/etc/nginx/ /home/test	# Скопировать директорию /etc/nginx контейнера webserver в /home/test хоста
+docker cp /home/test/nginx/sites-enabled/mysite.local.conf webserver:/etc/nginx/sites-enabled # Скопировать с хоста файл /home/test/nginx/sites-enabled/mysite.local.conf в /etc/nginx/sites-enabled контейнера webserver
+docker exec webserver nginx -t			# проверка  конфигурации nginx
+docker exec 431a3b3fc24b nginx -s reload	# перечитывание конфигурации nginx
+-----------------------------
+docker run ubuntu:18.10 echo 'hello from ubuntu'	# запустим наш первый контейнер Ubuntu
+docker run <image> <опциональная команды, которая выполнится внутри контейнера>
 docker run -d -p 80:80 -v /data:/data:rw nginx.test 	#Эта команда в фоновом режиме (-d) запустит контейнер на базе образа test-nginx. Опция -p 80:80 обеспечит передачу всех пакетов, предназначенных порту 80 хоста порту 80 контейнера.
 Опция -v укажет, что docker volume (общая директория между хостом и контейнером) нужно пробросить в контейнер (-v host_path_to_dir/container_path_to_dir). Причём контейнер имеет права на запись и чтение (:rw).
+docker run -d -p 80:80 -v $(pwd)/data:/data:rw nginx.test
 
 docker run -it ubuntu:18.10 /bin/bash	# Опция -it вместе с /bin/bash даёт доступ к выполнению команд в терминале внутри контейнера Ubuntu
 docker run -it <IMAGE> /bin/bash
+docker run -it --rm ubuntu:18.10 /bin/bash	# Потому, команду docker run очень часто запускают с дополнительным флагом --rm, который удаляет запущенный контейнер после работы:
 
-
-exit 				# выйдет из контейнера, и вернётся в основную ОС
-
-docker start <CONTAINER_ID>	# запустить ранее созданный контейнер (example ~ docker start fe6107aefa90 )
+-------------------------------
 docker exec -it fe6107aefa90 /bin/bash	# доступ к выполнению команд в терминале внутри контейнера Ubuntu <CONTAINER_ID> - fe6107aefa90
 # exec позволяет выполнить команду внутри запущенного контейнера. В нашем случае, мы выполнили /bin/bash, что позволило нам подключиться к терминалу внутри контейнера
 exec — выполнить, d201386a021f — для контейнера d201386a021f, /bin/bash — команду /bin/bash.
 
+docker exec webserver команда	# Выполнить в контейнере webserver команду команда
+exit 				# выйдет из контейнера, и вернётся в основную ОС
+docker logs -f 431a3b3fc24b  	#Теперь лог будет обновляться каждый раз, когда вы обновляете страницу в браузере. Выйти из этого режима можно набрав Ctrl + C, при этом сам контейнер остановлен не будет.
 
+docker start <CONTAINER_ID>	# запустить ранее созданный контейнер (example ~ docker start fe6107aefa90 )
 docker stop <CONTAINER_ID>	# остановим активный контейнер
 docker rm <CONTAINER_ID>	# удалим контейнер
 
-# Потому, команду docker run очень часто запускают с дополнительным флагом --rm, который удаляет запущенный контейнер после работы:
-docker run -it --rm ubuntu:18.10 /bin/bash
 
 Docker system prune -a		# Очистка всего и сразу

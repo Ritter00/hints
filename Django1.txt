@@ -5,8 +5,11 @@ https://djangodoc.ru/
 https://pocoz.gitbooks.io/django-v-primerah/content/ Джанго в примерах
 
 python -m venv venv     	# создаем виртуальное окружение, с названием "venv"
+python3 -m venv venv		# linux (apt install python3.8-venv)
 venv\scripts\activate    	# активируем его 
+source venv/bin/activate	# linux
 venv\scripts\deactivate		# деактивируем его
+deactivate			# linux
 pip3 install django      	# устанавливаем Django
 django-admin startproject project    # создаем пустой проект с названием project или python -m django-admin startproject project
 django-admin startproject project .	# тоже, но сточкой создается в текущей папке
@@ -94,7 +97,7 @@ https://russianblogs.com/article/6833594772/
 
 ____________________________________________________________________________________________________________________
 Перенос импортов
-pip freeze > requirments.txt   	#  создаем файл с импортами
+pip freeze > requirements.txt   	#  создаем файл с импортами
 pip install -r requirments.txt	# устанавливаем все модули из этого файла
 
 ____________________________________________________________________________________________________________________

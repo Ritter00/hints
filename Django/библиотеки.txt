@@ -1,0 +1,6 @@
+-----------------Регистрация, авторизация------------------------------
+https://auth0.com/docs/quickstart/webapp/django  				--Authlib OAuth
+
+-----------------Хранение данных---------------------------------------
+https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html	--django-storages — это набор пользовательских серверных хранилищ для Django.
+Amazon S3 - Apache Libcloud - Azure Storage - Digital Ocean - Dropbox - FTP - Google Cloud Storage - SFTP

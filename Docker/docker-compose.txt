@@ -1,0 +1,15 @@
+https://habr.com/ru/company/ruvds/blog/450312/
+https://habr.com/ru/post/501414/ Настройка Debian, Nginx и Gunicorn для Django проекта
+
+docker-compose config			# Проверяет корректность compose-файла в текущей директории
+sudo docker-compose up -d		# Создаёт контейнеры на основании compose-файла в текущей директории
+
+Если ошибки:
+sudo usermod -aG docker $USER		# Добавить текущего пользователя в группу докер
+sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+sudo service docker restart
+sudo docker-compose up -d
+
+docker rm $(docker ps -aq) --force	# Удалить все контейнеры
+
+netstat -tulpan				# порты, которые слушаютя

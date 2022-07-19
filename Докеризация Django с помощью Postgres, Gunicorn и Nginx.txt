@@ -1,0 +1,1057 @@
+https://django.fun/tutorials/dokerizaciya-django-s-pomoshyu-postgres-gunicorn-i-nginx/
+https://mherman.org/presentations/dockercon-2018/#1
+
+ $ mkdir django-on-docker && cd django-on-docker
+ $ mkdir app && cd app
+ sudo apt install python3.8-venv
+ $ python3.9 -m venv env
+ $ source env/bin/activate
+ (env)$
+ 
+ (env)$ pip install django==3.2.6
+ (env)$ django-admin.py startproject hello_django .
+ (env)$ python manage.py migrate
+ (env)$ python manage.py runserver
+
+Ctrl+C
+pip freeze > requirements.txt
+deactivate					# выйти из виртуальной среды
+rm -r env/					# удалить виртуальную среду
+rm db.sqlite3					# удалить БД db.sqlite3
+--------здесь же Dockerfile---------------------------------------------
+# pull official base image
+FROM python:3.9.6-alpine
+
+# set work directory
+WORKDIR /usr/src/app
+
+# set environment variables
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+# install dependencies
+RUN pip install --upgrade pip
+COPY ./requirements.txt .
+RUN pip install -r requirements.txt
+
+# copy project
+COPY . .
+--------------------------------------------------------------------------
+_______________________________________________________________________________________________________________________
+Докеризация Django с помощью Postgres, Gunicorn и Nginx
+Это пошаговое руководство подробно описывает, как настроить Django для запуска на Docker с Postgres. Для производственных сред мы добавим Nginx и Gunicorn. Мы также рассмотрим, как обслуживать статические и медиафайлы Django через Nginx.
+
+Зависимости:
+
+Django v3.2.6
+Docker v20.10.8
+Python v3.9.6
+Django on Docker Series:
+
+Докеризация Django с помощью Postgres, Gunicorn и Nginx
+Защита контейнерного приложения Django с помощью Let's Encrypt
+Развертывание Django на AWS с помощью Docker и Let's Encrypt
+Настройка проекта
+Создайте новый каталог проекта вместе с новым проектом Django:
+
+$ mkdir django-on-docker && cd django-on-docker
+ $ mkdir app && cd app
+ $ python3.9 -m venv env
+ $ source env/bin/activate
+ (env)$
+ 
+ (env)$ pip install django==3.2.6
+ (env)$ django-admin.py startproject hello_django .
+ (env)$ python manage.py migrate
+ (env)$ python manage.py runserver
+ 
+Не стесняйтесь менять virtualenv и Pip на Poetry или Pipenv. Для получения дополнительной информации просмотрите Современные среды Python.
+
+Перейдите по адресу http://localhost:8000/ для просмотра экрана приветствия Django. После этого завершите работу сервера. Затем выйдите из виртуальной среды и удалите ее. Теперь у нас есть простой проект Django для работы.
+
+Создайте файл requirements.txt в каталоге app и добавьте Django в качестве зависимости:
+
+Django==3.2.6 
+Поскольку мы перейдем к Postgres, удалите файл db.sqlite3 из каталога app.
+
+Ваш каталог проекта должен выглядеть следующим образом:
+
+└── app
+    ├── hello_django
+    │   ├── __init__.py
+    │   ├── asgi.py
+    │   ├── settings.py
+    │   ├── urls.py
+    │   └── wsgi.py
+    ├── manage.py
+    └── requirements.txt
+
+
+iptv-vip.com
+РЕКЛАМА
+
+IPTV для платформ Windows!
+
+
+mrqz.me
+РЕКЛАМА
+
+Недвижимость в Дубае от 300 000$. Большой выбор объектов
+Docker
+Установите Docker, если у вас его еще нет, добавьте Dockerfile в каталог app:
+
+# pull official base image
+FROM python:3.9.6-alpine
+
+# set work directory
+WORKDIR /usr/src/app
+
+# set environment variables
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+# install dependencies
+RUN pip install --upgrade pip
+COPY ./requirements.txt .
+RUN pip install -r requirements.txt
+
+# copy project
+COPY . .
+Так, мы начали с Alpine на основе образа Docker для Python 3.9.6. Затем мы установили рабочий каталог и две переменные окружения:
+
+PYTHONDONTWRITEBYTECODE: Запрещает Python записывать файлы pyc на диск (эквивалент опции python -B)
+PYTHONUNBUFFERED: Запрещает Python буферизовать stdout и stderr (эквивалент опции python -u)
+Наконец, мы обновили Pip, скопировали файл requirements.txt, установили зависимости и скопировали сам проект Django.
+
+Ознакомьтесь с Docker для разработчиков Python, чтобы узнать больше о структурировании файлов Docker, а также о некоторых лучших практиках настройки Docker для разработки на Python.
+
+Затем добавьте файл docker-compose.yml в корень проекта:
+
+version: '3.8'
+
+services:
+  web:
+    build: ./app
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./app/:/usr/src/app/
+    ports:
+      - 8000:8000
+    env_file:
+      - ./.env.dev
+Review the Compose file reference for info on how this file works.
+
+Просмотрите файл Compose для получения информации о том, как этот файл работает.
+
+Обновите переменные SECRET_KEY, DEBUG и ALLOWED_HOSTS в settings.py:
+
+SECRET_KEY = os.environ.get("SECRET_KEY")
+
+DEBUG = int(os.environ.get("DEBUG", default=0))
+
+# 'DJANGO_ALLOWED_HOSTS' should be a single string of hosts with a space between each.
+# For example: 'DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]'
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
+Убедитесь, что вы добавили импорт наверху:
+
+import os
+Затем создайте файл .env.dev в корне проекта для хранения переменных среды для разработки:
+
+DEBUG=1
+SECRET_KEY=foo
+DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1] 
+Создайте образ:
+
+$ docker-compose build 
+После создания образа запустите контейнер:
+
+$ docker-compose up -d 
+Перейдите по адресу http://localhost:8000/, чтобы снова просмотреть экран приветствия.
+
+Проверьте наличие ошибок в журналах, если это не работает, с помощью docker-compose logs -f.
+
+Postgres
+Чтобы настроить Postgres, нам нужно добавить новую службу в файл docker-compose.yml, обновить настройки Django и установить Psycopg2.
+
+Сначала добавьте новую службу db в docker-compose.yml:
+
+version: '3.8'
+
+services:
+  web:
+    build: ./app
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./app/:/usr/src/app/
+    ports:
+      - 8000:8000
+    env_file:
+      - ./.env.dev
+    depends_on:
+      - db
+  db:
+    image: postgres:13.0-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=hello_django
+      - POSTGRES_PASSWORD=hello_django
+      - POSTGRES_DB=hello_django_dev
+
+volumes:
+  postgres_data:
+Для сохранения данных после окончания жизни контейнера мы настроили том. Эта конфигурация привяжет postgres_data к директории "/var/lib/postgresql/data/" в контейнере.
+
+Мы также добавили ключ среды, чтобы определить имя базы данных по умолчанию и задать имя пользователя и пароль.
+
+Review the "Environment Variables" section of the Postgres Docker Hub page for more info.
+
+Дополнительные сведения см. в разделе «Переменные среды» на странице Postgres Docker Hub.
+
+Нам также понадобятся некоторые новые переменные среды для веб-службы, поэтому обновите .env.dev следующим образом:
+
+DEBUG=1
+SECRET_KEY=foo
+DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
+SQL_ENGINE=django.db.backends.postgresql
+SQL_DATABASE=hello_django_dev
+SQL_USER=hello_django
+SQL_PASSWORD=hello_django
+SQL_HOST=db
+SQL_PORT=5432
+Обновите ATABASES в settings.py:
+
+DATABASES = {
+    "default": {
+        "ENGINE": os.environ.get("SQL_ENGINE", "django.db.backends.sqlite3"),
+        "NAME": os.environ.get("SQL_DATABASE", BASE_DIR / "db.sqlite3"),
+        "USER": os.environ.get("SQL_USER", "user"),
+        "PASSWORD": os.environ.get("SQL_PASSWORD", "password"),
+        "HOST": os.environ.get("SQL_HOST", "localhost"),
+        "PORT": os.environ.get("SQL_PORT", "5432"),
+    }
+}
+Здесь база данных настраивается на основе переменных окружения, которые мы только что определили. Обратите внимание на значения по умолчанию.
+
+Обновите Dockerfile для установки соответствующих пакетов, необходимых для Psycopg2:
+
+# pull official base image
+FROM python:3.9.6-alpine
+
+# set work directory
+WORKDIR /usr/src/app
+
+# set environment variables
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+# install psycopg2 dependencies
+RUN apk update \
+    && apk add postgresql-dev gcc python3-dev musl-dev
+
+# install dependencies
+RUN pip install --upgrade pip
+COPY ./requirements.txt .
+RUN pip install -r requirements.txt
+
+# copy project
+COPY . .
+Добавьте Psycopg2 в requirements.txt:
+
+Django==3.2.6
+psycopg2-binary==2.9.1
+Ознакомьтесь с этой проблемой на GitHub для получения дополнительной информации об установке Psycopg2 в образ Docker на базе Alpine.
+
+Создайте новый образ и запустите два контейнера:
+
+$ docker-compose up -d --build 
+Запустите миграции:
+
+$ docker-compose exec web python manage.py migrate --noinput 
+Получили следующую ошибку?
+
+django.db.utils.OperationalError: FATAL: database "hello_django_dev" does not exist
+Запустите docker-compose down -v, чтобы удалить тома вместе с контейнерами. Затем заново соберите образы, запустите контейнеры и примените миграции.
+
+Убедитесь, что таблицы Django по умолчанию были созданы:
+
+$ docker-compose exec db psql --username=hello_django --dbname=hello_django_dev
+
+psql (13.0)
+Type "help" for help.
+
+hello_django_dev=# \l
+                                          List of databases
+       Name       |    Owner     | Encoding |  Collate   |   Ctype    |       Access privileges
+------------------+--------------+----------+------------+------------+-------------------------------
+ hello_django_dev | hello_django | UTF8     | en_US.utf8 | en_US.utf8 |
+ postgres         | hello_django | UTF8     | en_US.utf8 | en_US.utf8 |
+ template0        | hello_django | UTF8     | en_US.utf8 | en_US.utf8 | =c/hello_django              +
+                  |              |          |            |            | hello_django=CTc/hello_django
+ template1        | hello_django | UTF8     | en_US.utf8 | en_US.utf8 | =c/hello_django              +
+                  |              |          |            |            | hello_django=CTc/hello_django
+(4 rows)
+
+hello_django_dev=# \c hello_django_dev
+You are now connected to database "hello_django_dev" as user "hello_django".
+
+hello_django_dev=# \dt
+                     List of relations
+ Schema |            Name            | Type  |    Owner
+--------+----------------------------+-------+--------------
+ public | auth_group                 | table | hello_django
+ public | auth_group_permissions     | table | hello_django
+ public | auth_permission            | table | hello_django
+ public | auth_user                  | table | hello_django
+ public | auth_user_groups           | table | hello_django
+ public | auth_user_user_permissions | table | hello_django
+ public | django_admin_log           | table | hello_django
+ public | django_content_type        | table | hello_django
+ public | django_migrations          | table | hello_django
+ public | django_session             | table | hello_django
+(10 rows)
+
+hello_django_dev=# \q
+Вы можете проверить, что том был создан, выполнив:
+
+$ docker volume inspect django-on-docker_postgres_data
+Вы должны увидеть что-то похожее на:
+
+[
+    {
+        "CreatedAt": "2021-08-23T15:49:08Z",
+        "Driver": "local",
+        "Labels": {
+            "com.docker.compose.project": "django-on-docker",
+            "com.docker.compose.version": "1.29.2",
+            "com.docker.compose.volume": "postgres_data"
+        },
+        "Mountpoint": "/var/lib/docker/volumes/django-on-docker_postgres_data/_data",
+        "Name": "django-on-docker_postgres_data",
+        "Options": null,
+        "Scope": "local"
+    }
+]
+Затем добавьте файл entrypoint.sh в каталог app, чтобы проверить работоспособность Postgres перед применением миграции и запуском сервера разработки Django:
+
+#!/bin/sh
+
+if [ "$DATABASE" = "postgres" ]
+then
+    echo "Waiting for postgres..."
+
+    while ! nc -z $SQL_HOST $SQL_PORT; do
+      sleep 0.1
+    done
+
+    echo "PostgreSQL started"
+fi
+
+python manage.py flush --no-input
+python manage.py migrate
+
+exec "$@"
+Обновите разрешения файлов локально:
+
+$ chmod +x app/entrypoint.sh 
+Затем обновите файл Dockerfile, чтобы скопировать файл entrypoint.sh и запустить его как команду точки входа Docker:
+
+# pull official base image
+FROM python:3.9.6-alpine
+
+# set work directory
+WORKDIR /usr/src/app
+
+# set environment variables
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+# install psycopg2 dependencies
+RUN apk update \
+    && apk add postgresql-dev gcc python3-dev musl-dev
+
+# install dependencies
+RUN pip install --upgrade pip
+COPY ./requirements.txt .
+RUN pip install -r requirements.txt
+
+# copy entrypoint.sh
+COPY ./entrypoint.sh .
+RUN sed -i 's/\r$//g' /usr/src/app/entrypoint.sh
+RUN chmod +x /usr/src/app/entrypoint.sh
+
+# copy project
+COPY . .
+
+# run entrypoint.sh
+ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
+Добавьте переменную окружения DATABASE в .env.dev:
+
+DEBUG=1
+SECRET_KEY=foo
+DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
+SQL_ENGINE=django.db.backends.postgresql
+SQL_DATABASE=hello_django_dev
+SQL_USER=hello_django
+SQL_PASSWORD=hello_django
+SQL_HOST=db
+SQL_PORT=5432
+DATABASE=postgres
+Попробуйте еще раз:
+
+Пересоздайте образы
+Запустите контейнеры
+Зайдите на http://localhost:8000/
+Примечания
+Во-первых, несмотря на добавление Postgres, мы все еще можем создать независимый образ Docker для Django, если переменная окружения DATABASE не установлена на postgres. Чтобы проверить, создайте новый образ, а затем запустите новый контейнер:
+
+$ docker build -f ./app/Dockerfile -t hello_django:latest ./app
+$ docker run -d \
+    -p 8006:8000 \
+    -e "SECRET_KEY=please_change_me" -e "DEBUG=1" -e "DJANGO_ALLOWED_HOSTS=*" \
+    hello_django python /usr/src/app/manage.py runserver 0.0.0.0:8000
+Вы должны увидеть страницу приветствия по адресу http://localhost:8006
+
+Во-вторых, возможно, вы захотите закомментировать команды database flush и migrate в сценарии entrypoint.sh, чтобы они не выполнялись при каждом запуске или перезапуске контейнера:
+
+#!/bin/sh
+
+if [ "$DATABASE" = "postgres" ]
+then
+    echo "Waiting for postgres..."
+
+    while ! nc -z $SQL_HOST $SQL_PORT; do
+      sleep 0.1
+    done
+
+    echo "PostgreSQL started"
+fi
+
+# python manage.py flush --no-input
+# python manage.py migrate
+
+exec "$@"
+Вместо этого вы можете запустить их вручную, после запуска контейнеров, следующим образом:
+
+$ docker-compose exec web python manage.py flush --no-input
+$ docker-compose exec web python manage.py migrate 
+Gunicorn
+Для производственных сред добавим Gunicorn, WSGI-сервер промышленного класса, в файл требований:
+
+Django==3.2.6
+gunicorn==20.1.0
+psycopg2-binary==2.9.1 
+Интересно узнать о WSGI и Gunicorn? Просмотрите главу WSGI из курса Building Your Own Python Web Framework.
+
+Поскольку мы все еще хотим использовать встроенный сервер Django в разработке, создайте новый файл compose под названием docker-compose.prod.yml для производства:
+
+version: '3.8'
+
+services:
+  web:
+    build: ./app
+    command: gunicorn hello_django.wsgi:application --bind 0.0.0.0:8000
+    ports:
+      - 8000:8000
+    env_file:
+      - ./.env.prod
+    depends_on:
+      - db
+  db:
+    image: postgres:13.0-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - ./.env.prod.db
+
+volumes:
+  postgres_data:
+Если у вас несколько окружений, возможно, вам стоит рассмотреть возможность использования конфигурационного файла docker-compose.override.yml. При таком подходе вы добавляете базовую конфигурацию в файл docker-compose.yml, а затем используете файл docker-compose.override.yml для переопределения настроек конфигурации в зависимости от окружения.
+
+Обратите внимание на команду по умолчанию. Мы запускаем Gunicorn, а не сервер разработки Django. Мы также удалили том из службы web, поскольку он не нужен нам в производстве. Наконец, мы используем отдельные файлы переменных окружения, чтобы определить переменные окружения для обоих сервисов, которые будут передаваться контейнеру во время выполнения.
+
+.env.prod:
+
+DEBUG=0
+SECRET_KEY=change_me
+DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
+SQL_ENGINE=django.db.backends.postgresql
+SQL_DATABASE=hello_django_prod
+SQL_USER=hello_django
+SQL_PASSWORD=hello_django
+SQL_HOST=db
+SQL_PORT=5432
+DATABASE=postgres
+.env.prod.db:
+
+POSTGRES_USER=hello_django
+POSTGRES_PASSWORD=hello_django
+POSTGRES_DB=hello_django_prod
+Добавьте эти два файла в корень проекта. Вы, вероятно, захотите держать их вне контроля версий, поэтому добавьте их в файл .gitignore.
+
+Удалите контейнеры разработки (и связанные тома с флагом -v):
+
+$ docker-compose down -v 
+Затем создайте производственные образы и запустите контейнеры:
+
+$ docker-compose -f docker-compose.prod.yml up -d --build 
+Убедитесь, что база данных hello_django_prod была создана вместе с таблицами Django по умолчанию. Проверьте страницу администратора по адресу http://localhost:8000/admin. Статические файлы больше не загружаются. Это ожидаемо, так как режим отладки выключен. Мы исправим это в ближайшее время.
+
+Опять же, если контейнер не запускается, проверьте наличие ошибок в журналах с помощью docker-compose -f docker-compose.prod.yml logs -f.
+
+
+
+iptv-vip.com
+РЕКЛАМА
+
+IPTV для платформ Windows!
+
+
+1l-go.my.games
+РЕКЛАМА
+
+Топовая бесплатная браузерная игра Global City
+Производственный Dockerfile
+Заметили ли вы, что мы по-прежнему выполняем команды database flush (которая очищает базу данных) и migrate при каждом запуске контейнера? Это нормально для разработки, но давайте создадим новый файл точки входа для производства.
+
+entrypoint.prod.sh:
+
+#!/bin/sh
+
+if [ "$DATABASE" = "postgres" ]
+then
+    echo "Waiting for postgres..."
+
+    while ! nc -z $SQL_HOST $SQL_PORT; do
+      sleep 0.1
+    done
+
+    echo "PostgreSQL started"
+fi
+
+exec "$@"
+Обновите разрешения файлов локально:
+
+$ chmod +x app/entrypoint.prod.sh 
+Чтобы использовать этот файл, создайте новый Dockerfile с именем Dockerfile.prod для использования с производственными сборками:
+
+###########
+# BUILDER #
+###########
+
+# pull official base image
+FROM python:3.9.6-alpine as builder
+
+# set work directory
+WORKDIR /usr/src/app
+
+# set environment variables
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+# install psycopg2 dependencies
+RUN apk update \
+    && apk add postgresql-dev gcc python3-dev musl-dev
+
+# lint
+RUN pip install --upgrade pip
+RUN pip install flake8==3.9.2
+COPY . .
+RUN flake8 --ignore=E501,F401 .
+
+# install dependencies
+COPY ./requirements.txt .
+RUN pip wheel --no-cache-dir --no-deps --wheel-dir /usr/src/app/wheels -r requirements.txt
+
+
+#########
+# FINAL #
+#########
+
+# pull official base image
+FROM python:3.9.6-alpine
+
+# create directory for the app user
+RUN mkdir -p /home/app
+
+# create the app user
+RUN addgroup -S app && adduser -S app -G app
+
+# create the appropriate directories
+ENV HOME=/home/app
+ENV APP_HOME=/home/app/web
+RUN mkdir $APP_HOME
+WORKDIR $APP_HOME
+
+# install dependencies
+RUN apk update && apk add libpq
+COPY --from=builder /usr/src/app/wheels /wheels
+COPY --from=builder /usr/src/app/requirements.txt .
+RUN pip install --no-cache /wheels/*
+
+# copy entrypoint.prod.sh
+COPY ./entrypoint.prod.sh .
+RUN sed -i 's/\r$//g'  $APP_HOME/entrypoint.prod.sh
+RUN chmod +x  $APP_HOME/entrypoint.prod.sh
+
+# copy project
+COPY . $APP_HOME
+
+# chown all the files to the app user
+RUN chown -R app:app $APP_HOME
+
+# change to the app user
+USER app
+
+# run entrypoint.prod.sh
+ENTRYPOINT ["/home/app/web/entrypoint.prod.sh"]
+Здесь мы использовали Docker многоступенчатую сборку, чтобы уменьшить конечный размер образа. По сути, builder - это временный образ, который используется для сборки колес Python. Затем колеса копируются в конечный производственный образ, а образ builder удаляется.
+
+Вы можете пойти по пути многоступенчатой сборки еще дальше и использовать один Dockerfile вместо создания двух Dockerfiles. Подумайте о плюсах и минусах использования этого подхода вместо двух разных файлов.
+
+Заметили ли вы, что мы создали пользователя, не являющегося root? По умолчанию Docker запускает контейнерные процессы от имени root внутри контейнера. Это плохая практика, поскольку злоумышленники могут получить root-доступ к хосту Docker, если им удастся вырваться из контейнера. Если вы являетесь root в контейнере, вы будете root на хосте.
+
+Обновите веб-службу в файле docker-compose.prod.yml для сборки с помощью Dockerfile.prod:
+
+web:
+  build:
+    context: ./app
+    dockerfile: Dockerfile.prod
+  command: gunicorn hello_django.wsgi:application --bind 0.0.0.0:8000
+  ports:
+    - 8000:8000
+  env_file:
+    - ./.env.prod
+  depends_on:
+    - db
+Попробуйте:
+
+$ docker-compose -f docker-compose.prod.yml down -v
+$ docker-compose -f docker-compose.prod.yml up -d --build
+$ docker-compose -f docker-compose.prod.yml exec web python manage.py migrate --noinput 
+Nginx
+Следующим шагом добавим Nginx, который будет работать как обратный прокси для Gunicorn для обработки клиентских запросов, а также для обслуживания статических файлов.
+
+Добавьте сервис в docker-compose.prod.yml:
+
+nginx:
+  build: ./nginx
+  ports:
+    - 1337:80
+  depends_on:
+    - web
+Затем в локальном корне проекта создайте следующие файлы и папки:
+
+└── nginx
+    ├── Dockerfile
+    └── nginx.conf
+Dockerfile:
+
+FROM nginx:1.21-alpine
+
+RUN rm /etc/nginx/conf.d/default.conf
+COPY nginx.conf /etc/nginx/conf.d
+nginx.conf:
+
+upstream hello_django {
+    server web:8000;
+}
+
+server {
+
+    listen 80;
+
+    location / {
+        proxy_pass http://hello_django;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header Host $host;
+        proxy_redirect off;
+    }
+
+}
+Посмотрите Using NGINX and NGINX Plus as an Application Gateway with uWSGI and Django для получения дополнительной информации о настройке Nginx для работы с Django.
+
+Затем обновите веб-службу в docker-compose.prod.yml, заменив порты на expose:
+
+web:
+  build:
+    context: ./app
+    dockerfile: Dockerfile.prod
+  command: gunicorn hello_django.wsgi:application --bind 0.0.0.0:8000
+  expose:
+    - 8000
+  env_file:
+    - ./.env.prod
+  depends_on:
+    - db
+Сейчас порт 8000 открыт только внутри системы, для других служб Docker. Порт больше не будет публиковаться на хост-машине.
+
+Для получения дополнительной информации о портах и экспонировании просмотрите этот вопрос Stack Overflow.
+
+Попробуйте еще раз.
+
+$ docker-compose -f docker-compose.prod.yml down -v
+$ docker-compose -f docker-compose.prod.yml up -d --build
+$ docker-compose -f docker-compose.prod.yml exec web python manage.py migrate --noinput 
+Убедитесь, что приложение запущено и работает на http://localhost:1337.
+
+Структура вашего проекта теперь должна выглядеть следующим образом:
+
+├── .env.dev
+├── .env.prod
+├── .env.prod.db
+├── .gitignore
+├── app
+│   ├── Dockerfile
+│   ├── Dockerfile.prod
+│   ├── entrypoint.prod.sh
+│   ├── entrypoint.sh
+│   ├── hello_django
+│   │   ├── __init__.py
+│   │   ├── asgi.py
+│   │   ├── settings.py
+│   │   ├── urls.py
+│   │   └── wsgi.py
+│   ├── manage.py
+│   └── requirements.txt
+├── docker-compose.prod.yml
+├── docker-compose.yml
+└── nginx
+    ├── Dockerfile
+    └── nginx.conf
+После этого выключите контейнеры:
+
+$ docker-compose -f docker-compose.prod.yml down -v 
+Поскольку Gunicorn является сервером приложений, он не будет обслуживать статические файлы. Итак, как следует обрабатывать статические и медиафайлы в этой конкретной конфигурации?
+
+Статические файлы
+Обновите settings.py:
+
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles" 
+Разработка
+Теперь любой запрос к http://localhost:8000/static/* будет обслуживаться из каталога "staticfiles".
+
+Для проверки сначала пересоберите образы и запустите новые контейнеры, как обычно. Убедитесь, что статические файлы по-прежнему корректно обслуживаются по адресу http://localhost:8000/admin.
+
+Производство
+Для производства добавьте том в веб-службы и службы nginx в docker-compose.prod.yml, чтобы каждый контейнер имел общий каталог с именем «staticfiles»:
+
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: ./app
+      dockerfile: Dockerfile.prod
+    command: gunicorn hello_django.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - static_volume:/home/app/web/staticfiles
+    expose:
+      - 8000
+    env_file:
+      - ./.env.prod
+    depends_on:
+      - db
+  db:
+    image: postgres:13.0-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - ./.env.prod.db
+  nginx:
+    build: ./nginx
+    volumes:
+      - static_volume:/home/app/web/staticfiles
+    ports:
+      - 1337:80
+    depends_on:
+      - web
+
+volumes:
+  postgres_data:
+  static_volume:
+Нам также необходимо создать папку «/home/app/web/staticfiles» в Dockerfile.prod:
+
+...
+
+# create the appropriate directories
+ENV HOME=/home/app
+ENV APP_HOME=/home/app/web
+RUN mkdir $APP_HOME
+RUN mkdir $APP_HOME/staticfiles
+WORKDIR $APP_HOME
+
+...
+Почему это необходимо?
+
+Docker Compose обычно монтирует именованные тома от имени root. А поскольку мы используем пользователя, не являющегося root, то при выполнении команды collectstatic, если каталог еще не существует, мы получим ошибку отказа в разрешении.
+
+Чтобы обойти это, вы можете либо:
+
+Создать папку в Dockerfile (источник)
+Измените права доступа к каталогу после его монтирования (источник)
+Мы использовали первый вариант.
+
+Следующим образом обновите конфигурацию Nginx, чтобы направлять запросы статических файлов в папку "staticfiles":
+
+upstream hello_django {
+    server web:8000;
+}
+
+server {
+
+    listen 80;
+
+    location / {
+        proxy_pass http://hello_django;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header Host $host;
+        proxy_redirect off;
+    }
+
+    location /static/ {
+        alias /home/app/web/staticfiles/;
+    }
+
+}
+Разверните контейнеры для разработки:
+
+$ docker-compose down -v 
+Тест:
+
+$ docker-compose -f docker-compose.prod.yml up -d --build
+$ docker-compose -f docker-compose.prod.yml exec web python manage.py migrate --noinput
+$ docker-compose -f docker-compose.prod.yml exec web python manage.py collectstatic --no-input --clear 
+Опять же, запросы http://localhost:1337/static/* будут обслуживаться из каталога "staticfiles".
+
+Перейдите по адресу http://localhost:1337/admin и убедитесь, что статические ресурсы загружаются правильно.
+
+Вы также можете проверить в журналах - через docker-compose -f docker-compose.prod.yml logs -f - что запросы к статическим файлам успешно обрабатываются через Nginx:
+
+nginx_1  | 192.168.144.1 - - [23/Aug/2021:20:11:00 +0000] "GET /admin/ HTTP/1.1" 302 0 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36" "-"
+nginx_1  | 192.168.144.1 - - [23/Aug/2021:20:11:00 +0000] "GET /admin/login/?next=/admin/ HTTP/1.1" 200 2214 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36" "-"
+nginx_1  | 192.168.144.1 - - [23/Aug/2021:20:11:00 +0000] "GET /static/admin/css/base.css HTTP/1.1" 304 0 "http://localhost:1337/admin/login/?next=/admin/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36" "-"
+nginx_1  | 192.168.144.1 - - [23/Aug/2021:20:11:00 +0000] "GET /static/admin/css/nav_sidebar.css HTTP/1.1" 304 0 "http://localhost:1337/admin/login/?next=/admin/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36" "-"
+nginx_1  | 192.168.144.1 - - [23/Aug/2021:20:11:00 +0000] "GET /static/admin/css/responsive.css HTTP/1.1" 304 0 "http://localhost:1337/admin/login/?next=/admin/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36" "-"
+nginx_1  | 192.168.144.1 - - [23/Aug/2021:20:11:00 +0000] "GET /static/admin/css/login.css HTTP/1.1" 304 0 "http://localhost:1337/admin/login/?next=/admin/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36" "-"
+nginx_1  | 192.168.144.1 - - [23/Aug/2021:20:11:00 +0000] "GET /static/admin/js/nav_sidebar.js HTTP/1.1" 304 0 "http://localhost:1337/admin/login/?next=/admin/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36" "-"
+nginx_1  | 192.168.144.1 - - [23/Aug/2021:20:11:00 +0000] "GET /static/admin/css/fonts.css HTTP/1.1" 304 0 "http://localhost:1337/static/admin/css/base.css" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36" "-"
+nginx_1  | 192.168.144.1 - - [23/Aug/2021:20:11:00 +0000] "GET /static/admin/fonts/Roboto-Regular-webfont.woff HTTP/1.1" 304 0 "http://localhost:1337/static/admin/css/fonts.css" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36" "-"
+nginx_1  | 192.168.144.1 - - [23/Aug/2021:20:11:00 +0000] "GET /static/admin/fonts/Roboto-Light-webfont.woff HTTP/1.1" 304 0 "http://localhost:1337/static/admin/css/fonts.css" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36" "-"
+После выполнения контейнеров:
+
+$ docker-compose -f docker-compose.prod.yml down -v 
+
+
+1l-go.my.games
+РЕКЛАМА
+
+Топовая бесплатная браузерная игра Global City
+
+
+xcraft.ru
+РЕКЛАМА
+•
+18+
+
+Они вернулись! Зерги против Терранов.
+Медиафайлы
+Чтобы проверить работу с медиафайлами, начните с создания нового приложения Django:
+
+$ docker-compose up -d --build
+$ docker-compose exec web python manage.py startapp upload 
+Добавьте новое приложение в INSTALLED_APPS в settings.py:
+
+INSTALLED_APPS = [
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+
+    "upload",
+]
+app/upload/views.py:
+
+from django.shortcuts import render
+from django.core.files.storage import FileSystemStorage
+
+
+def image_upload(request):
+    if request.method == "POST" and request.FILES["image_file"]:
+        image_file = request.FILES["image_file"]
+        fs = FileSystemStorage()
+        filename = fs.save(image_file.name, image_file)
+        image_url = fs.url(filename)
+        print(image_url)
+        return render(request, "upload.html", {
+            "image_url": image_url
+        })
+    return render(request, "upload.html")
+Добавьте каталог «templates» в каталог «app/upload», а затем добавьте новый шаблон с именем upload.html:
+
+{% block content %}
+
+  <form action="{% url "upload" %}" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="file" name="image_file">
+    <input type="submit" value="submit" />
+  </form>
+
+  {% if image_url %}
+    <p>File uploaded at: <a href="{{ image_url }}">{{ image_url }}</a></p>
+  {% endif %}
+
+{% endblock %}
+app/hello_django/urls.py:
+
+from django.contrib import admin
+from django.urls import path
+from django.conf import settings
+from django.conf.urls.static import static
+
+from upload.views import image_upload
+
+urlpatterns = [
+    path("", image_upload, name="upload"),
+    path("admin/", admin.site.urls),
+]
+
+if bool(settings.DEBUG):
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+app/hello_django/settings.py:
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "mediafiles"
+Разработка
+Тест:
+
+$ docker-compose up -d --build 
+Вы должны иметь возможность загрузить изображение по адресу http://localhost:8000/, а затем просмотреть его по адресу http://localhost:8000/media/IMAGE_FILE_NAME.
+
+Производство
+Для производства добавьте еще один том в веб-службы и службы nginx:
+
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: ./app
+      dockerfile: Dockerfile.prod
+    command: gunicorn hello_django.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - static_volume:/home/app/web/staticfiles
+      - media_volume:/home/app/web/mediafiles
+    expose:
+      - 8000
+    env_file:
+      - ./.env.prod
+    depends_on:
+      - db
+  db:
+    image: postgres:13.0-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - ./.env.prod.db
+  nginx:
+    build: ./nginx
+    volumes:
+      - static_volume:/home/app/web/staticfiles
+      - media_volume:/home/app/web/mediafiles
+    ports:
+      - 1337:80
+    depends_on:
+      - web
+
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:
+Создайте каталог "/home/app/web/mediafiles" в Dockerfile.prod:
+
+...
+
+# create the appropriate directories
+ENV HOME=/home/app
+ENV APP_HOME=/home/app/web
+RUN mkdir $APP_HOME
+RUN mkdir $APP_HOME/staticfiles
+RUN mkdir $APP_HOME/mediafiles
+WORKDIR $APP_HOME
+
+...
+Обновите конфигурацию Nginx еще раз:
+
+upstream hello_django {
+    server web:8000;
+}
+
+server {
+
+    listen 80;
+
+    location / {
+        proxy_pass http://hello_django;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header Host $host;
+        proxy_redirect off;
+    }
+
+    location /static/ {
+        alias /home/app/web/staticfiles/;
+    }
+
+    location /media/ {
+        alias /home/app/web/mediafiles/;
+    }
+
+}
+Реконструкция:
+
+$ docker-compose down -v
+ 
+$ docker-compose -f docker-compose.prod.yml up -d --build
+$ docker-compose -f docker-compose.prod.yml exec web python manage.py migrate --noinput
+$ docker-compose -f docker-compose.prod.yml exec web python manage.py collectstatic --no-input --clear 
+Протестируйте его в последний раз:
+
+Загрузите изображение на http://localhost:1337/.
+Затем просмотрите изображение на http://localhost:1337/media/IMAGE_FILE_NAME.
+Если вы видите ошибку 413 Request Entity Too Large, вам нужно увеличить максимально допустимый размер тела клиентского запроса в контексте сервера или местоположения в конфигурации Nginx.
+
+Пример:
+
+location / {
+    proxy_pass http://hello_django;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header Host $host;
+    proxy_redirect off;
+    client_max_body_size 100M;
+} 
+Заключение
+В этом руководстве мы рассмотрели, как контейнеризировать веб-приложение Django с Postgres для разработки. Мы также создали готовый к производству файл Docker Compose, в который добавили Gunicorn и Nginx для обработки статических и мультимедийных файлов. Теперь вы можете протестировать производственную установку локально.
+
+Что касается фактического развертывания в производственной среде, вы, вероятно, захотите использовать:
+
+Полностью управляемая служба базы данных, такая как RDS или Cloud SQL, вместо управления собственным экземпляром Postgres в контейнере.
+Пользователь без полномочий root для служб db и nginx
+Для получения других советов по производству просмотрите это обсуждение.
+
+You can find the code in the django-on-docker repo.
+
+Вы можете найти код в репозитории django-on-docker.
+
+Здесь также доступна более старая версия кода Pipenv.
+
+Спасибо, что прочитали!
+
+Django on Docker Series:
+
+Докеризация Django с помощью Postgres, Gunicorn и Nginx
+Защита контейнерного приложения Django с помощью Let's Encrypt
+Развертывание Django на AWS с помощью Docker и Let's Encrypt
+https://testdriven.io/blog/dockerizing-django-with-postgres-gunicorn-and-nginx/
