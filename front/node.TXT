@@ -1,4 +1,61 @@
-﻿npm
+﻿Установка
+sudo apt-get purge nodejs	# удалить старую версию
+sudo apt-get autoremove		# удалить старую версию	
+sudo apt-get install curl
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+nvm ls				# список версий Node
+nvm install --lts		# текущий стабильный выпуск (LTS) для Node.js
+node --version   
+npm --version
+nvm use --lts			# переключиться на версию LTS
+Чтобы изменить версию Node.js на ту, которую вы хотите использовать для проекта, создайте каталог проекта с помощью команды mkdir NodeTest и укажите каталог, выполнив команду cd NodeTest. Затем введите nvm use node, чтобы переключиться на текущую версию, или nvm use --lts, чтобы переключиться на версию LTS. Вы также можете использовать определенный номер для любых установленных дополнительных версий, например nvm use v8.2.1. (Чтобы просмотреть все доступные версии Node.js, используйте команду nvm ls-remote.)1
+Если вы используете nvm для установки Node.js и npm, не следует выполнять команду SUDO для установки новых пакетов.
+
+_________Создание нового проекта, с кастомными настройками custom_prj____________
+npm install				# если скачать(усановить) проект из репозитория(готовый)
+------------Инициализация и установка зависимостей------------------------
+npm init -y				# старт проекта, на все вопросы ответит да (в заранее созданной папке с названием проекта)
+npm i webpack webpack-cli --save-dev	# локальная установка (npm i -g webpack webpack-cli   -глобальная)
+npm install @babel/core babel-loader @babel/preset-env @babel/preset-react	# лучше кадый отдельно
+npm install react react-dom
+npm install css-loader style-loader	# устанавливаем css обработчики
+npm install html-webpack-plugin		# добавить в webpack.config.js (const HtmlWebpacPlugin = require("html-webpack-plugin");)
+npm install webpack-dev-server		# установим веб сервер
+npm install axios			# библиотека типа JQuery
+npm install react-bootstrap bootstrap	# подключим бутстрап (https://react-bootstrap.github.io/components/alerts)
+mkdir -p src/{styles,components}	# создать папки (mkdir -p src/styles и mkdir -p src/components)
+custom_prj/src/index.html		# <body><div id="root"></div></body> стандартная привязка компонентов к элементу root
+custom_prj/src/index.js			#
+custom_prj/webpack.config.js		# в корне проекта
+custom_prj/.babelrc			# в нем { "presets": ["@babel/preset-env", "@babel/preset-react"]} для перевода кода в ES5
+custom_prj/package.json			# добавим сценарии "start"(собираем проект и следим за изменениями в .js) и "build"
+{ 
+  //... 
+  "scripts": { 
+    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "webpack --mode=development --watch",
+    "build": "webpack --mode=production" 
+  } 
+}	
+npm start 				# скопилируем код в /custom_prj/dist/bundle.js (используем настройки custom_prj/webpack.config.js) и следим за изменениями
+npx webpack --mode=development --watch	# то же
+custom_prj/src/components/App.js	# создаем компоненту App
+custom_prj/src/styles/App.css		# добавим стили
+custom_prj/package.json			# заменить "start": "webpack-dev-server --mode development --open",(подключим вебсервер)
+npm install prop-types			# для отлова ошибок (only dev)
+
+---------------React  TypeScript----------------------
+подключить все то же, что к обычному проекту
+npm i typescript
+npm i @types/react
+npm i @types/react-dom
+npm i awesome-typescript-loader		#--force) https://www.npmjs.com/package/awesome-typescript-loader - отсюда настройка
+file.tsx				# все файлы .tsx, точки входа и др. зависимости в webpack.config.js
+./tsconfig.json				#{"compilerOptions": {"jsx": "react","allowSyntheticDefaultImports": true},"exclude": ["node_modules"]}
+npm cache clean --force
+
+
+npm
 npm init	# старт проекта
 npm init -y	# старт проекта, на все вопросы ответит да
 npm install	/ yarn install # Восстановить модули по данным package.json
@@ -11,7 +68,7 @@ node app.js	#запуск файла app.js
 Ctrl+C		#остановка сервера и других пакетов
 ___________________________________________________
 webpack
-
+npm i -g webpack webpack-cli
 npm i webpack webpack-cli --save-dev	# локальная установка (npm i -g webpack webpack-cli   -глобальная)
 { 
   //... 

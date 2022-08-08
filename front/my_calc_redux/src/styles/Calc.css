@@ -1,0 +1,17 @@
+#calc-div {
+    width: 60%;
+    padding: 2%;
+    height: 2rem0;
+    background-color: rgb(247, 248, 248);
+    margin: 1% 19%;
+}
+h1{
+    text-align: center;
+}
+.screen-div{
+    border: 0.1rem solid;
+    width: 40rem;
+    height: 2em;
+    text-align: right;
+    padding: 5%;
+}

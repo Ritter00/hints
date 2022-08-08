@@ -1,0 +1,64 @@
+Это менеджер состояний.Хранилище данных приложения
+https://github.com/rajdee/redux-in-russian/tree/master/docs/api		# на русском дока
+https://redux.js.org/api/api-reference/
+
+npm i redux
+import { createStore } from "redux";		# 
+const store = createStore(changeState);		# создаем экзепляр и передаем функцию, которая будет его изменять -Создает Redux store, которое хранит полное дерево состояния вашего приложения
+function changeState(state=[], action){
+    switch (action.type){
+        case "WRITE":
+            return [				# возвращает state и добавляет в него что-то
+                ...state,
+                action.payload
+            ]
+        break;
+        default:
+            return state
+    } 
+};						# Функция-редьюсер, которая меняет стейт.
+store.dispatch({type:'WRITE', payload:"some"});	# создает и передает action -инициировать событие и вызвать действие
+store.subscribe(()=>{console.log('подписка',store.getState())});	# подписаться на изменения
+
+console.log(store.getState())			# увидеть , что в сторе
+
+npm i react-redux --save --save-exact		# допю библиотека вебхуков
+import { Provider } from "react-redux";		# index.js и обернуть приложение 
+ReactDOM.render(
+<Provider store={store}>
+	<ReduxApp />
+</Provider>, document.getElementById("root"));	# передаем переменные props, store={store} - Делает store доступным для того, чтобы связать его затем с React-компонентом через connect.
+создать канал ----------------------------------
+https://react-redux.js.org/api/connect
+import { connect } from "react-redux";		# in ReduxApp.js
+export default connect(
+    // mapStateToProps
+    state => ({
+        teststore : state
+    }),
+    // mapDispatchToProps
+    dispatch => ({})
+)(ReduxApp) ;					# изменить в конце файла Связывает Redux Store и React-компоненты
+
+----------combineReducers-----------------------
+Преобразует различные функции-редюсеры, в одну функцию-редюсер, которую можно передать в метод createStore
+https://github.com/rajdee/redux-in-russian/tree/master/docs/api
+https://redux.js.org/api/api-reference
+import { combineReducers } from "redux";
+export default combineReducers({
+    changeFramework,
+    changeLibrary
+});
+---------------------applyMiddleware----------------------------
+Mидлвар (middleware) - это предлагаемый способ расширения Redux с помощью настраиваемых функций. Mидлвар позволяет вам обернуть метод стора dispatch для пользы и дела. 
+https://github.com/rajdee/redux-in-russian/blob/master/docs/api/applyMiddleware.md
+------------------compose----------------------------------------
+Это утилита функционального программирования, которая включена в Redux для удобства.
+Вы можете использовать ее, чтобы применить несколько расширителей стора последовательно.
+https://github.com/rajdee/redux-in-russian/blob/master/docs/api/compose.md
+------------------структура приложения-------------
+https://livebook.manning.com/book/redux-in-action/chapter-11/11
+https://tech.offgrid-electric.com/domain-directory-structure-for-react-apps-why-its-worth-trying-b3855ee77a1e?gi=313fef993f12
+https://markgituma.medium.com/redux-ducks-pattern-as-an-es6-class-for-rest-apis-3e5f65c79cbe
+
+

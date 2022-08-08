@@ -2,45 +2,65 @@
 https://habr.com/ru/post/310460/  # Полное практическое руководство по Docker: с нуля до кластера на AWS
 https://medium.com/nuances-of-programming/%D0%BC%D0%BE%D1%89%D0%BD%D0%B5%D0%B9%D1%88%D0%B8%D0%B9-%D1%81%D0%BF%D0%B8%D1%81%D0%BE%D0%BA-%D0%BA%D0%BE%D0%BC%D0%B0%D0%BD%D0%B4-%D0%B2-docker-b2a22747de12
 https://timeweb.com/ru/community/articles/osnovnye-komandy-docker
+https://www.youtube.com/watch?v=n9uCgUzfeRQ		видео про докер
+Установит утилиту make и использовать сокращенные команда оттуда
 
-
-----------------------------
+.dockerignore			# вносим все, что не нужно (.git /n Dockerfile /n .idea  и т.д.)
+docker <command> --help		# список опций и их описание (docker ps --help)
+----------------------------IMAGE/образ----------------------
 docker pull ubuntu:18.10	# Скачать образ/IMAGE убунту 18.10 с Dockerhub.com (там много других образов)
-docker build -t nginx.test .	# Создать образ nginx.test на основании Dockerfile из текущей директории
+docker images			# список всех загруженных образов
+docker image ls			# то же
+docker build .			# построить образ на основании Dockerfile из текущей директории(точка в конце)
+docker build -t nginx-test .	# Создать образ c именем nginx-test на основании Dockerfile из текущей директории
+docker build -t nginx-test:12 . # Создать образ c именем nginx-test c тэгом -12 на основании Dockerfile из текущей директории
+docker rmi <IMAGE_ID>		# удалим IMAGE
+docker image prune		# Remove unused images
+docker tag <IMAGE_NAME> <IMAGE_NEW_NAME> 	# создать новый образ на основе другого
+docker push <ИМЯ_на_DockerHub>/<IMAGE_NAME>:tag	# запушить в свой репозиторий на DockerHub свой образ
+----------------------------CONTAINER/контейнер-----------------
 docker ps			# списoк запущенных контейнеров
 docker ps -a			# список всех контейнеров без исключения
-docker images			# список всех загруженных образов
-docker image ls
-docker volume
-docker network ls		# список сетей
+docker run <image> <опциональная команды, которая выполнится внутри контейнера>	# docker run ubuntu:18.10 echo 'hello from ubuntu'
+docker run -d -p 80:80 -v $(pwd)/data:/data:rw nginx-test		# Эта команда в фоновом режиме (-d) запустит контейнер на базе образа test-nginx. Опция -p 80:80 обеспечит передачу всех пакетов, предназначенных порту 80 хоста порту 80 контейнера.
+									# Опция -v укажет, что docker volume (общая директория между хостом и контейнером) нужно пробросить в контейнер (-v host_path_to_dir/container_path_to_dir). Причём контейнер имеет права на запись и чтение (:rw).
+docker run -d -p 80:80 -v folder:/data:rw nginx-test			# создается именнованный volume (внутри докера,а не на машине), который не удаляется с контейнером 
+
+docker run -d -p 8000:8000 --rm <image>	
+				# удалить контейнер после остановки (--rm)
+docker run -d -p 8000:8000 --rm -e PORT=8000 --name <NAME_CONTAINER> <image>	# -e PORT=8000, передать переменную PORT со значением 8000 (можно несколько -e PORT=8000 -e HOME=/app)
+docker run -d -p 8000:8000 --rm --env-file ./config/.env --name <NAME_CONTAINER> <image>	# --env-file ./config/.env взять переменные по пути ./config/.env
+
+docker run -it <IMAGE> /bin/bash					# 
+docker run -it ubuntu:18.10 /bin/bash					# Опция -it вместе с /bin/bash даёт доступ к выполнению команд в терминале внутри контейнера Ubuntu
+docker logs <CONTAINER_ID>	# Логи контейнера
+docker logs -f 431a3b3fc24b  	# Теперь лог будет обновляться каждый раз, когда вы обновляете страницу в браузере. Выйти из этого режима можно набрав Ctrl + C, при этом сам контейнер остановлен не будет.
+
+docker start <CONTAINER_ID>	# запустить ранее созданный контейнер (example ~ docker start fe6107aefa90 )
+docker stop <CONTAINER_ID>	# остановим активный контейнер
+docker rm <CONTAINER_ID>	# удалим контейнер
+docker container prune		# удалить все остановленные контенеры
+
+docker exec -it fe6107aefa90 /bin/bash		# доступ к выполнению команд в терминале внутри запущенного контейнера Ubuntu <CONTAINER_ID> - fe6107aefa90
+						# exec позволяет выполнить команду внутри запущенного контейнера. В нашем случае, мы выполнили /bin/bash, что позволило нам подключиться к терминалу внутри контейнера
+						# exec — выполнить, d201386a021f — для контейнера d201386a021f, /bin/bash — команду /bin/bash.
+docker exec webserver команда			# Выполнить в контейнере webserver команду команда
+
+exit 						# выйдет из контейнера, и вернётся в основную ОС
+-----------------------------
+docker volume					# список volume
+docker volume inspect <VOLUME_ID>		# что внутри volume
+docker volume rm <VOLUME_ID>			# удалить volume
+docker volume prune				# удалить все неиспользуемые volume
+-v $(pwd)/data:/data:rw nginx-test		# полный путь на сервере : путь в контейнере : права(опционально, по умолчанию rw). Можно менять данные и они сразу применяются
+-v folder:/data					# именованный volume, создается внутри докера
+
+docker network ls				# список сетей
 
 docker cp webserver:/etc/nginx/ /home/test	# Скопировать директорию /etc/nginx контейнера webserver в /home/test хоста
 docker cp /home/test/nginx/sites-enabled/mysite.local.conf webserver:/etc/nginx/sites-enabled # Скопировать с хоста файл /home/test/nginx/sites-enabled/mysite.local.conf в /etc/nginx/sites-enabled контейнера webserver
 docker exec webserver nginx -t			# проверка  конфигурации nginx
 docker exec 431a3b3fc24b nginx -s reload	# перечитывание конфигурации nginx
 -----------------------------
-docker run ubuntu:18.10 echo 'hello from ubuntu'	# запустим наш первый контейнер Ubuntu
-docker run <image> <опциональная команды, которая выполнится внутри контейнера>
-docker run -d -p 80:80 -v /data:/data:rw nginx.test 	#Эта команда в фоновом режиме (-d) запустит контейнер на базе образа test-nginx. Опция -p 80:80 обеспечит передачу всех пакетов, предназначенных порту 80 хоста порту 80 контейнера.
-Опция -v укажет, что docker volume (общая директория между хостом и контейнером) нужно пробросить в контейнер (-v host_path_to_dir/container_path_to_dir). Причём контейнер имеет права на запись и чтение (:rw).
-docker run -d -p 80:80 -v $(pwd)/data:/data:rw nginx.test
-
-docker run -it ubuntu:18.10 /bin/bash	# Опция -it вместе с /bin/bash даёт доступ к выполнению команд в терминале внутри контейнера Ubuntu
-docker run -it <IMAGE> /bin/bash
-docker run -it --rm ubuntu:18.10 /bin/bash	# Потому, команду docker run очень часто запускают с дополнительным флагом --rm, который удаляет запущенный контейнер после работы:
-
--------------------------------
-docker exec -it fe6107aefa90 /bin/bash	# доступ к выполнению команд в терминале внутри контейнера Ubuntu <CONTAINER_ID> - fe6107aefa90
-# exec позволяет выполнить команду внутри запущенного контейнера. В нашем случае, мы выполнили /bin/bash, что позволило нам подключиться к терминалу внутри контейнера
-exec — выполнить, d201386a021f — для контейнера d201386a021f, /bin/bash — команду /bin/bash.
-
-docker exec webserver команда	# Выполнить в контейнере webserver команду команда
-exit 				# выйдет из контейнера, и вернётся в основную ОС
-docker logs -f 431a3b3fc24b  	#Теперь лог будет обновляться каждый раз, когда вы обновляете страницу в браузере. Выйти из этого режима можно набрав Ctrl + C, при этом сам контейнер остановлен не будет.
-
-docker start <CONTAINER_ID>	# запустить ранее созданный контейнер (example ~ docker start fe6107aefa90 )
-docker stop <CONTAINER_ID>	# остановим активный контейнер
-docker rm <CONTAINER_ID>	# удалим контейнер
-
 
 Docker system prune -a		# Очистка всего и сразу

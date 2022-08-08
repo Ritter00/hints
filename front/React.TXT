@@ -2,7 +2,11 @@ https://create-react-app.dev/docs/getting-started/  - оф.документац�
 npx create-react-app my-app				#создать приложение my-app
 cd my-app						#перейти в папку my-app
 npm start						#запустить
+npm run eject						# раскрыть все настройки (/app/config/webpack)
 
 https://github.com/SkillfactoryCoding/PHP-React-create-react-app 	#рекомендуем прочитать README, в нем очень много полезной информации.
 https://create-react-app.dev/						#с документацией и примерами.
 https://frontend-digest.com/whats-new-in-create-react-app-4-809b24e4d6cb #Интересная статья о последних новых функциях create-react-app.
+https://habr.com/ru/post/319270/						# JSX — подробности
+
+let [<название переменной>, <функция>] = React.useState(<начальное значение переменной>); следить за переменной

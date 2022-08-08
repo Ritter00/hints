@@ -1,0 +1,16 @@
+header {
+    font-size: 2rem;
+    color: #fcf7f7;
+    background-color: rgb(17, 17, 17);
+    height: 88px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+}
+header .btn123 {
+    border-radius: 5px;
+    margin: 10px;
+    
+    border: 1px solid rgb(216, 26, 26);
+}

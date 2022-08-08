@@ -2,7 +2,8 @@
 https://django.fun/docs/django/ru/3.1/	# документацияя на русском
 https://djbook.ru/ch01.html
 https://djangodoc.ru/
-https://pocoz.gitbooks.io/django-v-primerah/content/ Джанго в примерах
+https://pocoz.gitbooks.io/django-v-primerah/content/ 		# Джанго в примерах
+https://www.reg.ru/blog/shpargalka-po-python-dlya-django/ 	# Шпаргалка по Python для Django
 
 python -m venv venv     	# создаем виртуальное окружение, с названием "venv"
 python3 -m venv venv		# linux (apt install python3.8-venv)
