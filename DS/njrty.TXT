@@ -1,5 +1,24 @@
+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
+hJfy7mJ8bUraQWx - aleh.zimnokha@aimtalk.me
+admin3@admin.admin - vber#%TverASF6
+admin1@admin.admin - BOUN234trASD786
 https://habr.com/ru/post/341704/
 https://vh82.hoster.by:2083/ - хостинг
+visemby
+Aesae1ia
+
+https://my.deliverysolution.site/login
+mmolokovskikh@gmail.com
+g75btyf6uz
+
+sudo ssh -i "kk/ds_prod" ubuntu@51.250.92.135		#ru
+ssh -i "kk/ds_prod" root@165.227.155.121		#site
+/home/ritter00/kk
+git pull
+delivery
+docker-compose down
+docker-compose -f docker-compose.yadcloud.yml build
+docker-compose -f docker-compose.yadcloud.yml up
 
 docker-compose down -v	# сбросить миграции
 docker-compose build
@@ -24,6 +43,12 @@ cat backup_17_may_2022..sql | docker exec -i 4decc1a1be46 /usr/bin/mysql -u root
 docker exec 0d5a544509f7 /usr/bin/mysqldump -u root --password=password db_django > backup_10_may_2022.sql		# перезаписать дамп памяти backup.sql
 docker exec 1c4bba058f81 /usr/bin/mysqldump -u root --password=password db_django > backup_6_june_2022_adr.sql
 
+
+cat dump_migrator_10.july.2022.sql | docker exec -i d7ef798f0d08 psql --username delivery delivery_db	#DS
+docker exec -i 6ffc4f61209b psql --username delivery delivery_db < dump_migrator_10.july.2022.sql
+docker exec -it bb763df94c76 dropdb delivery_db -U delivery						#KILL db DS
+
+
 mysqldump --no-tablespaces -u visemby_visem_dev --password=visem_a1zahOeR9kcef visemby_dev > dump07_06_22.sql  # сделать дамп БД на дев-висем
 
 send_mail('subject', 'body of the message', 'postmaster@mail.deliverysolution.site', ['django.test.ds.183@gmail.co'])
@@ -41,9 +66,21 @@ c = Category.objects.all().last()
 ---Деплой Висем------------------------------------serve
 source /home/visemby/virtualenv/dev.visem.by/3.8/bin/activate && cd /home/visemby/dev.visem.by	#виртульное окр
 git pull origin dev
-ssh password на хостинге - 
+ssh password на хостинге - visem
 python manage.py migrate
 pip install -r requirements.txt
 затем перезагружаешь приложение и обнуляешь passenger
 git restore passenger_wsgi.py
 -----------------------------------------------------------------
+yamispizza.ru partisanka2016@yandex.ru
+
+------------------------deploy delivery.site--------------------------------------
+cd ../usr/src/delivery-solution
+git pull git@github.com:DeliverySolution/delivery-solution.git
+docker-compose -f docker-compose.prod.yml down
+docker-compose -f docker-compose.prod.yml up --build -d 
+docker-compose -f docker-compose.prod.yml exec web python manage.py migrateb
+docker-compose -f docker-compose.prod.yml exec web python manage.py collectstatic --no-input --clear
+docker system prune -a
+___________________________________________________
+https://habr.com/ru/post/579336/ спарсить любой сайт

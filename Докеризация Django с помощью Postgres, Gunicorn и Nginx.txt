@@ -87,16 +87,6 @@ Django==3.2.6
     └── requirements.txt
 
 
-iptv-vip.com
-РЕКЛАМА
-
-IPTV для платформ Windows!
-
-
-mrqz.me
-РЕКЛАМА
-
-Недвижимость в Дубае от 300 000$. Большой выбор объектов
 Docker
 Установите Docker, если у вас его еще нет, добавьте Dockerfile в каталог app:
 
