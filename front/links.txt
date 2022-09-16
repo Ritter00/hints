@@ -1,0 +1,18 @@
+https://www.valentinog.com/blog/redux/	
+React Redux Tutorial for Beginners: The Complete Guide (2020)
+-----------------------------------------------------------
+https://medium.com/analytics-vidhya/django-react-redux-and-jwt-728e284c5bc9	
+Django + React, Redux and JWT  - пример проекта
+-----------------------------------------------------------
+https://itchef.ru/articles/193860/	
+Руководство: проект Django-REST-React-Redux (часть 3)
+-----------------------------------------------------------
+https://habr.com/ru/post/509118/	
+Как спроектировать хранение данных в React-приложении? - Redux store vs React state
+-----------------------------------------------------------
+https://habr.com/ru/post/546632/	
+React: основные подходы к управлению состоянием
+-----------------------------------------------------------
+https://blog.ithillel.ua/ru/videos/upravlenie-sostoyaniem-v-react-redux-vs-context	
+Управление состоянием в React: redux vs context
+-----------------------------------------------------------

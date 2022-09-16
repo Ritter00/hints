@@ -26,6 +26,9 @@ docker-compose up
 docker-compose exec web python manage.py makemigrations		# во втором терминале
 docker-compose exec web python manage.py migrate
 
+docker exec -it 16f67df7da20 /bin/bash	# доступ в контейнер
+chmod o+xrw $(find *.jpg)		# найти и назначить права
+
 docker-compose up --force-recreate
 docker-compose exec web python manage.py shell
 from accounts.models import Account
@@ -59,7 +62,7 @@ from addresses.models import City
 from addresses.models import Address
 from addresses.models import WorkingDays
 from addresses.models import Contact
-
+5766
 from shop.api_v2.serializers import CategorySerializerV2
 from management.models import Category
 c = Category.objects.all().last()
@@ -84,3 +87,12 @@ docker-compose -f docker-compose.prod.yml exec web python manage.py collectstati
 docker system prune -a
 ___________________________________________________
 https://habr.com/ru/post/579336/ спарсить любой сайт
+
+------------------залить бд деливери-------------------------------
+cat bsckup.sql | docker exec -it pg_container -U delivery -d delivery_db
+docker exec -it bb763df94c76 dropdb delivery_db -U delivery
+postgresql
+sudo systemctl stop postgresql
+-с "CREATE DATABASE delivery_db;"
+docker exec -it bb763df94c76 psql -U delivery -c "CREATE DATABASE delivery_db;"
+-----------------------------------------------------------
