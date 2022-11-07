@@ -6,6 +6,9 @@ https://habr.com/ru/post/341704/
 https://vh82.hoster.by:2083/ - хостинг
 visemby
 Aesae1ia
+https://dev.visem.by/admin/
+login: admin
+pass: viSem!2022
 
 https://my.deliverysolution.site/login
 mmolokovskikh@gmail.com
@@ -36,36 +39,39 @@ Account.objects.all()
 
 sudo chmod 777 db_django	#права удалить папку
 sudo rm -r db_django/
+sudo chown -R ritter00:ritter00 db_django/
 
 docker stop $(docker ps -a -q)
 docker rm $(docker ps -a -q)
 docker system prune --volumes	#очистить образы
 
+------дамп с сервера на локалку висем-----------------
+source /home/visemby/virtualenv/dev.visem.by/3.8/bin/activate && cd /home/visemby/dev.visem.by			#виртульное окр на сервере
+mysqldump --no-tablespaces -u visemby_visem_dev --password=visem_a1zahOeR9kcef visemby_dev > dump31_10_22.sql   # сделать дамп БД на дев-висем
+														#скачать и загрузить в корень проекта
+sudo rm -r db_django/												#удалить БД
+docker system prune --volumes											#очистить образы чистит все
+docker-compose up --build											#заново собрать 
+docker-compose exec web python manage.py makemigrations		# во втором терминале
+docker-compose exec web python manage.py migrate
+cat dump31_10_22.sql | docker exec -i b367287b312f /usr/bin/mysql -u root --password=password db_django		#загрузить бд(номер контейнера взять свой - b367287b312f)
+-----------------------------------------------------------
+
 cat dump07_06_22.sql | docker exec -i 945cb1dc8ecc /usr/bin/mysql -u root --password=password db_django 	# загрузить дамп памяти backup.sql
-cat backup_17_may_2022..sql | docker exec -i 4decc1a1be46 /usr/bin/mysql -u root --password=password db_django
+cat dump31_10_22.sql | docker exec -i b367287b312f /usr/bin/mysql -u root --password=password db_django
 docker exec 0d5a544509f7 /usr/bin/mysqldump -u root --password=password db_django > backup_10_may_2022.sql		# перезаписать дамп памяти backup.sql
 docker exec 1c4bba058f81 /usr/bin/mysqldump -u root --password=password db_django > backup_6_june_2022_adr.sql
 
+cat dump_migrator_10.july.2022.sql | docker exec -i 1fdf480233db psql --username delivery delivery_db	#DS
+docker exec -i 1fdf480233db psql --username delivery delivery_db < dump_migrator_10.july.2022.sql
+docker exec -it 4540739de5b0 dropdb delivery_db -U delivery						#KILL db DS
 
-cat dump_migrator_10.july.2022.sql | docker exec -i d7ef798f0d08 psql --username delivery delivery_db	#DS
-docker exec -i 6ffc4f61209b psql --username delivery delivery_db < dump_migrator_10.july.2022.sql
-docker exec -it bb763df94c76 dropdb delivery_db -U delivery						#KILL db DS
-
-
-mysqldump --no-tablespaces -u visemby_visem_dev --password=visem_a1zahOeR9kcef visemby_dev > dump07_06_22.sql  # сделать дамп БД на дев-висем
+mysqldump --no-tablespaces -u visemby_visem_dev --password=visem_a1zahOeR9kcef visemby_dev > dump31_10_22.sql  # сделать дамп БД на дев-висем
 
 send_mail('subject', 'body of the message', 'postmaster@mail.deliverysolution.site', ['django.test.ds.183@gmail.co'])
 ________________________________________________
 docker-compose exec web python manage.py shell
-import datetime
-from addresses.models import City
-from addresses.models import Address
-from addresses.models import WorkingDays
-from addresses.models import Contact
-5766
-from shop.api_v2.serializers import CategorySerializerV2
-from management.models import Category
-c = Category.objects.all().last()
+
 ---Деплой Висем------------------------------------serve
 source /home/visemby/virtualenv/dev.visem.by/3.8/bin/activate && cd /home/visemby/dev.visem.by	#виртульное окр
 git pull origin dev
@@ -74,25 +80,41 @@ python manage.py migrate
 pip install -r requirements.txt
 затем перезагружаешь приложение и обнуляешь passenger
 git restore passenger_wsgi.py
------------------------------------------------------------------
-yamispizza.ru partisanka2016@yandex.ru
-
+---------------------------CI/CD--------------------------------------
+https://medium.com/swlh/how-to-deploy-your-application-to-digital-ocean-using-github-actions-and-save-up-on-ci-cd-costs-74b7315facc2
 ------------------------deploy delivery.site--------------------------------------
 cd ../usr/src/delivery-solution
 git pull git@github.com:DeliverySolution/delivery-solution.git
 docker-compose -f docker-compose.prod.yml down
 docker-compose -f docker-compose.prod.yml up --build -d 
-docker-compose -f docker-compose.prod.yml exec web python manage.py migrateb
+docker-compose -f docker-compose.prod.yml exec web python manage.py migrate &&
 docker-compose -f docker-compose.prod.yml exec web python manage.py collectstatic --no-input --clear
 docker system prune -a
+-----------------обновить сертификат dev.delivery------------------------------
+cd ../usr/src/delivery-solution
+docker-compose -f docker-compose.prod.yml down								#остановить сервер, порт 80 д.б. свободен
+certbot certonly -d dev.deliverysolution.site								#(sudo) обновить сертификат для dev.deliverysolution.site
+Выберите Spin up a temporary webserver (standalone) (введите 1).					#поднять временный сервер для проверки
+Выберите Renew & replace the cert (limit ~5 per 7 days) (введите 2).
+docker-compose -f docker-compose.prod.yml up --build -d 						#запкстить контейнеры 
+https://trueconf.ru/blog/baza-znaniy/sozdanie-sertifikata-lets-encrypt-na-linux.html			#получить и обновить сертификат на сервере
+https://pentacent.medium.com/nginx-and-lets-encrypt-with-docker-in-less-than-5-minutes-b4b8a60d3a71  	#docker-nginx-certbot
 ___________________________________________________
 https://habr.com/ru/post/579336/ спарсить любой сайт
 
 ------------------залить бд деливери-------------------------------
+удалить контейнер с бд
+docker volume rm delivery-solution_postgres_data 			#удалить том с БД
+docker-compose build
+docker-compose up
+cat dump_migrator_10.july.2022.sql | docker exec -i 1fdf480233db psql --username delivery delivery_db	#залить базу
+docker-compose exec web python manage.py makemigrations		
+docker-compose exec web python manage.py migrate
+
 cat bsckup.sql | docker exec -it pg_container -U delivery -d delivery_db
-docker exec -it bb763df94c76 dropdb delivery_db -U delivery
+docker exec -it 4540739de5b0 dropdb delivery_db -U delivery
 postgresql
 sudo systemctl stop postgresql
 -с "CREATE DATABASE delivery_db;"
-docker exec -it bb763df94c76 psql -U delivery -c "CREATE DATABASE delivery_db;"
+docker exec -it 4540739de5b0 psql -U delivery -c "CREATE DATABASE delivery_db;"
 -----------------------------------------------------------

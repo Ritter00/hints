@@ -1,0 +1,188 @@
+Запускаем терминал в папке publicposts/
+npx create-react-app frontend
+Для этого нам понадобится установленный Node.js и npm.
+Выполняем команду или переходим в папку frontend и вызываем терминал оттуда:
+cd frontend/
+Выполняем команду для установки Axios:
+npm install axios --save
+Запускаем сервер и радуемся его работоспособности!
+npm start
+
+Создаем файл Posts.js в папке publicposts/frontend/src/. Прописываем основную модель и зависимости:
+
+import React, {Component} from "react";
+import PostService from "./PostService";
+
+const postService = new PostService();
+
+export default class Posts extends Component {
+
+    
+}
+Добавим конструктор в класс Posts:
+
+constructor(props){
+    super(props)
+    this.state = {
+        data : [],
+        inputValue: ''
+    }
+
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+}
+В поле data будем подгружать посты.
+В поле input_value будем хранить введенный пост.
+Также мы объявили два события:
+
+handleChange — событие, выполняющееся, когда изменили поле ввода.
+handleSubmit — событие нажатия на клавишу подтверждения отправки поста.
+Теперь пропишем метод класса для получения данных с сервера и обработку события подключения компонента, в котором сразу и выполняем функцию загрузки данных:
+
+getData(){
+    postService.getPosts().then(result => {
+        this.setState({data: result.data})
+    	})
+}
+
+componentDidMount(){
+    this.getData()
+}
+Здесь все просто: в getData() выполняем функцию из postService загрузки всех постов.
+
+Когда подгружаем компонент — выполняем эту функцию.
+
+Теперь сделаем функцию для лайка.
+
+setLike(post) {
+    postService.setLikePost(post.id)
+    post.likesCount += 1
+    this.forceUpdate()    
+}
+Ставим лайк — говорим серверу, что лайк поставили. Но его ответа ждать не будем, добавим лайк и нарисуем интерфейс снова функцией forceUpdate():
+
+render() {
+    return (
+        <div id = 'posts'>
+        {this.state.data.map(post =>
+            <div id = {'post_' + post.id}>
+                <p> {post.text} </p>
+                <button onClick={() => this.setLike(post)}>  {post.likesCount}</button>
+                <p> Date : {post.date}</p>
+                <hr/>
+            </div>
+        )}
+        <input type='text' onChange={this.handleChange} value={this.state.inputValue}></input><button onClick={this.handleSubmit}>Send</button>
+        </div>
+    	)
+}
+Циклично загружаем все посты, попутно добавляя функции по нажатию кнопок Like, передавая в качестве аргумента итерируемый объект post. Еще сразу добавляем прописанные события по вводу нового поста.
+
+Осталось написать обработчики событий, и финальный файл будет выглядеть следующим образом:
+
+Posts.js
+
+import React, {Component} from "react";
+import PostService from "./PostService";
+
+const postService = new PostService();
+
+export default class Posts extends Component {
+	constructor(props){
+    	super(props)
+    	this.state = {
+        	data : [],
+        	inputValue: ''
+    	}
+
+    	this.handleChange = this.handleChange.bind(this);
+    	this.handleSubmit = this.handleSubmit.bind(this);
+	}
+
+	handleChange(event) {
+    	this.setState({inputValue: event.target.value});
+	}
+
+	handleSubmit(event) {
+    	postService.createPost({'text' : this.state.inputValue});
+    	this.getData()
+    	this.setState({inputValue : ''})
+	}
+
+	getData(){
+    	postService.getPosts().then(result => {
+        	this.setState({data: result.data})
+    	})
+	}
+
+	componentDidMount(){
+    	this.getData()
+	}
+
+	setLike(post) {
+    	postService.setLikePost(post.id)
+    	post.likesCount += 1
+    	this.forceUpdate()    
+	}
+
+	render() {
+    	return (
+        	<div id = 'posts'>
+        	{this.state.data.map(post =>
+            	<div id = {'post_' + post.id}>
+                	<p> {post.text} </p>
+                	<button onClick={() => this.setLike(post)}>  {post.likesCount}</button>
+                	<p> Date : {post.date}</p>
+                	<hr/>
+            	</div>
+        	)}
+        	<input type='text' onChange={this.handleChange} value={this.state.inputValue}></input><button onClick={this.handleSubmit}>Send</button>
+        	</div>
+    	)
+	}
+
+}
+Если поля ввода меняется, сразу присваиваем его inputValue. По нажатию подтверждения отправляем inputValue в функцию createPost(). Подгружаем посты заново и ставим поле ввода пустым.
+
+Осталось только подгрузить наш модуль в основное приложение React.
+
+Редактируем файл publicposts/frontend/src/App.js, удаляем все лишнее и подгружаем наш компонент Posts.
+
+Файл App.js
+
+import Posts from './Posts'
+
+function App() {
+    return (
+	<>
+  	    <Posts/>
+	</>
+    );
+}
+
+export default App;
+
+Открываем файл publicposts/frontend/src/PostService.js и прописываем функции с использованием Axios.
+import axios from 'axios';
+const API_URL = 'http://localhost:8000';
+
+export default class PostService{
+
+    constructor(){}
+
+
+    getPosts() {
+    const url = `${API_URL}/api/posts/`;
+    return axios.get(url).then(response => response.data);
+    }
+
+    setLikePost(id) {
+    const url = `${API_URL}/api/like_post/` + id;
+    return axios.get(url).then(response => response.data);
+    }
+
+    createPost(text){
+    const url = `${API_URL}/api/posts/`;
+    return axios.post(url,text);
+    }
+}
