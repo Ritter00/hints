@@ -14,8 +14,9 @@ https://my.deliverysolution.site/login
 mmolokovskikh@gmail.com
 g75btyf6uz
 
-sudo ssh -i "kk/ds_prod" ubuntu@51.250.92.135		#ru
-ssh -i "kk/ds_prod" root@165.227.155.121		#site
+sudo ssh -i "kk/ds_prod" ubuntu@51.250.92.135		# ru
+ssh -i "kk/ds_prod" root@165.227.155.121		# dev site
+ssh -i "kk/ds_prod" root@165.22.64.66			# prod
 /home/ritter00/kk
 git pull
 delivery
@@ -29,10 +30,16 @@ docker-compose up
 docker-compose exec web python manage.py makemigrations		# во втором терминале
 docker-compose exec web python manage.py migrate
 
+docker-compose exec web django-admin makemessages -l en		# подготовка перевода
+docker-compose exec web django-admin compilemessages		# применение
+
+./stripe listen --forward-to localhost:8000/webhook/
+
 docker exec -it 16f67df7da20 /bin/bash	# доступ в контейнер
 chmod o+xrw $(find *.jpg)		# найти и назначить права
 
 docker-compose up --force-recreate
+
 docker-compose exec web python manage.py shell
 from accounts.models import Account
 Account.objects.all()
@@ -69,8 +76,10 @@ docker exec -it 4540739de5b0 dropdb delivery_db -U delivery						#KILL db DS
 mysqldump --no-tablespaces -u visemby_visem_dev --password=visem_a1zahOeR9kcef visemby_dev > dump31_10_22.sql  # сделать дамп БД на дев-висем
 
 send_mail('subject', 'body of the message', 'postmaster@mail.deliverysolution.site', ['django.test.ds.183@gmail.co'])
-________________________________________________
+------------Parser + cron --------------------------------------
 docker-compose exec web python manage.py shell
+docker-compose exec web python manage.py parse_products		# парсинг товаров Висем
+source /home/visemby/virtualenv/dev.visem.by/3.8/bin/activate && cd /home/visemby/dev.visem.by && python manage.py parse_products # script for cron visem
 
 ---Деплой Висем------------------------------------serve
 source /home/visemby/virtualenv/dev.visem.by/3.8/bin/activate && cd /home/visemby/dev.visem.by	#виртульное окр
@@ -118,3 +127,5 @@ sudo systemctl stop postgresql
 -с "CREATE DATABASE delivery_db;"
 docker exec -it 4540739de5b0 psql -U delivery -c "CREATE DATABASE delivery_db;"
 -----------------------------------------------------------
+https://pentacent.medium.com/nginx-and-lets-encrypt-with-docker-in-less-than-5-minutes-b4b8a60d3a71
+https://www.nginx.com/blog/using-free-ssltls-certificates-from-lets-encrypt-with-nginx/

@@ -1,0 +1,6 @@
+Download
+https://dashboard.ngrok.com/get-started/setup
+распаковать и перейти к папке с файлом (cmd)
+ngrok config add-authtoken 2Ig3XOFbdFVuJWFN5i9u9CxQRI1_4bmTHVW7ubzpS1yPEW7r1
+авторизироваться
+ngrok http 8000 (или любой другой порт)

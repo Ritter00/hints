@@ -19,3 +19,6 @@ python manage.py makemessages -l ru	#делаем перевод, вместо r
 django-admin makemessages -l en		# то же
 Затем записываем в сгенерированный файл django.po перевод 
 python manage.py compilemessages	# компилируем этот перевод(django-admin compilemessages). ~ docker-compose exec web django-admin compilemessages
+
+from django.utils.translation import gettext_lazy as _	# в пайтон файлах
+string = _('Hello world') 

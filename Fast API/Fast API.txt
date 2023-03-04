@@ -1,0 +1,59 @@
+python -m venv venv     	# создаем виртуальное окружение, с названием "venv"
+python3 -m venv venv		# linux (apt install python3.8-venv)
+venv\scripts\activate    	# активируем его 
+source venv/bin/activate	# linux
+venv\scripts\deactivate		# деактивируем его
+deactivate			# linux
+
+pip install fastapi
+pip install uvicorn		# запускает сервер
+pip install jinja2		# шаблонизатор
+pip install aiofiles		# для работы со статистическими файлами
+# SQLалхим ORM для БД - найти и подключить
+создать папки 'static' и 'templates', если надо
+создать main.py и в нем
+from fastapi import FastAPI, Request
+from pydantic import BaseModel			# сериализатор
+from typing import Optional			# get параметры
+from fastapi.staticfiles import StaticFiles	#
+from fastapi.templating import Jinja2Templates	#
+
+app = FastAPI()
+app.mount('/static', StaticFiles(directory='static'), name='static')	# путь к статикфайлам
+templates = Jinja2Templates(directory='templates')			# путь к шаблонам
+
+# create class
+class Item(BaseModel):
+    name: str
+    price: int 
+    is_offer: Optional[bool] = None
+
+------------функции обработчики------------------
+@app.get('/index')		# декоратор get-запрос, /index - путь,url
+def index():			
+    return {'hello': 'world'}
+
+@app.get('/items/{item_id}/new/{newstring}')
+def items(item_id: int, newstring:str):
+    return {'item_id': item_id, 'newstring':newstring}
+
+# запрос вида http://127.0.0.1:8000/param/34?q=reee
+@app.get('/param/{item_id}')
+def items(item_id: int, q: Optional[str]=None):
+    return {'item_id': item_id, 'q':q}
+
+@app.put('/item/{item_id}')
+def update_item(item_id: int, item: Item):
+    return {'item_id': item_id, 'name': item.name, 'price': item.price, 'is_offer':is_offer,}
+
+@app.get('/main', response_class=HTMLResponse)
+def index(request: Request):
+    return templates.TemplateResponse('index.html', {'request':request})
+
+--------------------------------------------------
+в Терминале запускаем
+uvicorn main:app --reload	# main- имя файла, app-имя приложения в нем, --reload - перезагрузка изменений
+
+http://127.0.0.1:8000/index	# переходим, смотрим
+http://127.0.0.1:8000/main	# переходим, смотрим
+http://127.0.0.1:8000/docs	# swagger - автодокументация для API
