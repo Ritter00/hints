@@ -1,0 +1,26 @@
+http:
+    routers:
+        dev.deliverysolution.site-secure:
+            entryPoints:
+                - "https"
+            rule: Host(`dev.deliverysolution.site`)
+            service: dev.deliverysolution.site
+            tls:
+                certResolver: lets_encrypt
+            middlewares:
+                - hsts-header
+
+        dev.deliverysolution.site-insecure:
+            entryPoints:
+                - "http"
+            rule: Host(`dev.deliverysolution.site`)
+            service: dev.deliverysolution.site
+            middlewares:
+                - hsts-header
+                - redirect-to-https
+
+    services:
+        dev.deliverysolution.site:
+            loadBalancer:
+                servers:
+                    - url: http://nginx

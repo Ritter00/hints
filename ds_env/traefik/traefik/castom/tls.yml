@@ -1,0 +1,16 @@
+tls:
+  options:
+    modern:
+      preferServerCipherSuites: false
+      maxVersion: "VersionTLS13"
+      minVersion: "VersionTLS12"
+      cipherSuites: {
+        "TLS_ECDHE-ECDSA-AES128-GCM-SHA256",
+        "TLS_ECDHE-RSA-AES128-GCM-SHA256",
+        "TLS_ECDHE-ECDSA-AES256-GCM-SHA384",
+        "TLS_ECDHE-RSA-AES256-GCM-SHA384",
+        "TLS_ECDHE-ECDSA-CHACHA20-POLY1305",
+        "TLS_ECDHE-RSA-CHACHA20-POLY1305",
+        "TLS_DHE-RSA-AES128-GCM-SHA256",
+        "TLS_DHE-RSA-AES256-GCM-SHA384"
+      }

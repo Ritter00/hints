@@ -1,0 +1,144 @@
+В прошлом юните мы научились переводить простейшую статическую информацию из представлений и шаблонов. Это было довольно просто. Сейчас же мы займёмся переводом информации из базы данных, т. е. переводом моделей. Это поможет сделать наш сайт полностью понятным для пользователей из любой точки мира!
+
+Очевидно, что мы не сможем применять функцию gettext к нашим моделям, потому как содержимое полей объектов может изменяться. Для этого нам надо будет воспользоваться другим приложением, которое с помощью заданных нами настроек будет создавать дополнительные поля для перевода основных полей.
+
+Но давайте по порядку.
+
+Начнём с самого главного — нам надо установить приложение, которое позволяет делать удобные переводы в моделях.
+
+pip install django-modeltranslation
+После того как мы его установили, его надо включить в настройках в установленных приложениях.
+
+INSTALLED_APPS = [
+    'modeltranslation', # обязательно впишите его перед админом
+ 
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+ 
+    'basic',
+]
+Также в настройках должны быть указаны языки, на которые надо переводить наше приложение. Например, с прошлого юнита у вас должны стоять русский и английский языки.
+
+LANGUAGES = [
+    ('en-us', 'English'),
+    ('ru', 'Русский')
+]
+Если вам нужны ещё какие-либо языки, можете вписать их сюда. Если же у вас несколько языков, то вы можете записать их в такой же отдельный список MODELTRANSLATION_LANGUAGES, но в нашем случае это не требуется.
+
+Теперь нам надо указать нашему приложению, как именно и что именно надо переводить, Для этого создадим в папке с приложением файл translation.py и запишем в него следующие строки:
+
+from .models import Category, MyModel
+from modeltranslation.translator import register, TranslationOptions # импортируем декоратор для перевода и класс настроек, от которого будем наследоваться
+ 
+ 
+# регистрируем наши модели для перевода
+ 
+@register(Category)
+class CategoryTranslationOptions(TranslationOptions):
+    fields = ('name', ) # указываем, какие именно поля надо переводить в виде кортежа
+ 
+ 
+@register(MyModel)
+class MyModelTranslationOptions(TranslationOptions):
+    fields = ('name', )
+Теперь нам надо зарегистрировать наш перевод в админ-панели.
+
+admin.py
+
+from django.contrib import admin
+from .models import MyModel, Category
+from modeltranslation.admin import TranslationAdmin # импортируем модель амдинки (вспоминаем модуль про переопределение стандартных админ-инструментов)
+ 
+# Register your models here.
+ 
+# Регистрируем модели для перевода в админке
+ 
+class CategoryAdmin(TranslationAdmin):
+    model = Category
+ 
+ 
+class MyModelAdmin(TranslationAdmin):
+    model = MyModel
+ 
+ 
+admin.site.register(MyModel)
+admin.site.register(Category)
+После всех этих операций нужно сделать миграции, чтобы в базу данных добавились новые поля, а затем применить изменения.
+
+img
+
+Если в итоге вы увидели примерно такие сообщения, то значит вы всё сделали правильно.
+
+Поскольку у нас уже были записи в базе данных, надо будет ввести команду update_translation_fields.
+
+img
+
+Теперь дело за малым: надо отредактировать наше представление, чтобы мы могли получить доступ к объектам из шаблонов.
+
+from .models import MyModel
+....
+ 
+ 
+# Create your views here.
+class Index(View):
+    def get(self, request):
+        #. Translators: This message appears on the home page only
+        models = MyModel.objects.all()
+ 
+        context = {
+            'models': models,
+        }
+ 
+        return HttpResponse(render(request, 'index.html', context))
+ 
+ 
+В сам шаблон надо внести изменения, чтобы можно было увидеть те самые данные, которые мы переводим.
+
+{% load i18n %}
+ 
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page title</title>
+</head>
+<body>
+    <form action="{% url 'set_language' %}" method="POST"> {% csrf_token %} <!-- Не забываем по csrf_token для POST-запросов -->
+        <input type="hidden" name="next" value="{{ redirect_to }}">
+        
+        <select name="language" id="">
+            {% get_available_languages as LANGUAGES %} <!-- получаем языки -->
+            {% get_language_info_list for LANGUAGES as languages %} <!-- Помещаем их в список languages -->
+ 
+            {% for language in languages %} <!-- Итерируясь по списку, выводим их название на языке пользователя и код -->
+                <option value="{{ language.code }}" {% if language.code == LANGUAGE_CODE %} selected {% endif %} >
+                    {{ language.name_local }} - {{ language.code }}
+                </option>
+            {% endfor %}
+        </select>
+        <input type="submit" value="set">
+    </form>
+ 
+    {% for model in models %}
+    <div class="model-class">
+        {{ model.name }}
+    </div>
+    {% endfor %}
+</body>
+</html>
+
+ 
+Всё готово. Теперь на главной странице должны показываться имена объекта MyModel, которые уже лежали у нас в базе данных. Сейчас, даже если мы переключим язык на русский, мы увидим следующее:
+
+img
+
+Ничего не произошло, т. к. мы не вписали нужные строки для перевода в соответствующие поля. Давайте перейдём в админ-панель и сделаем это!
+
+img
+
+В поле name[ru], очевидно, надо вписать название на русском. Сделайте так с нужными объектами, которые надо перевести, и можете обновлять страницу, теперь она будет на русском!

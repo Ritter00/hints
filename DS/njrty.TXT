@@ -9,30 +9,37 @@ Aesae1ia
 https://dev.visem.by/admin/
 login: admin
 pass: viSem!2022
+seologic -> seologic@seologic.com -> Hj45#4&==dosAW
 
 https://my.deliverysolution.site/login
 mmolokovskikh@gmail.com
 g75btyf6uz
-
+# токен  для DigitalOcean
+dop_v1_0516a3f6026a8fe3f2acdfd69b4f4c01d80456951472d7c2e351f6a3c8ebbea0
+---------ДОСТУП к СЕРВЕРАМ--------------------------------------------------
 sudo ssh -i "kk/ds_prod" ubuntu@51.250.92.135		# ru
 ssh -i "kk/ds_prod" root@165.227.155.121		# dev site
 ssh -i "kk/ds_prod" root@165.22.64.66			# prod
 /home/ritter00/kk
+------------------ЯНДЕКС CLOUD-----------------------------------------------
 git pull
 delivery
 docker-compose down
 docker-compose -f docker-compose.yadcloud.yml build
 docker-compose -f docker-compose.yadcloud.yml up
-
+-----------МИГРАЦИИ------------------------------------------------------------
 docker-compose down -v	# сбросить миграции
 docker-compose build
 docker-compose up
 docker-compose exec web python manage.py makemigrations		# во втором терминале
 docker-compose exec web python manage.py migrate
-
+------------ПЕРЕВОД-----------------------------------------------------------
 docker-compose exec web django-admin makemessages -l en		# подготовка перевода
 docker-compose exec web django-admin compilemessages		# применение
-
+-----------Установить НОВУЮ БИБЛИОТЕКУ-----------------------------------------
+docker-compose exec web pip install django-modeltranslation
+docker-compose exec web pip freeze > requirements.txt
+------------STRIPE WEBHOOK------------------------------------------------------
 ./stripe listen --forward-to localhost:8000/webhook/
 
 docker exec -it 16f67df7da20 /bin/bash	# доступ в контейнер
@@ -99,6 +106,13 @@ docker-compose -f docker-compose.prod.yml up --build -d
 docker-compose -f docker-compose.prod.yml exec web python manage.py migrate &&
 docker-compose -f docker-compose.prod.yml exec web python manage.py collectstatic --no-input --clear
 docker system prune -a
+------------------------deploy prod delivery.site--------------------------------------
+cd ../usr/src/delivery-solution
+git pull git@github.com:DeliverySolution/delivery-solution.git
+docker-compose -f docker-compose.prod.real.yml down
+docker-compose -f docker-compose.prod.real.yml up --build -d 
+docker-compose -f docker-compose.prod.real.yml exec web python manage.py migrate &&
+docker-compose -f docker-compose.prod.real.yml exec web python manage.py collectstatic --no-input --clear
 -----------------обновить сертификат dev.delivery------------------------------
 cd ../usr/src/delivery-solution
 docker-compose -f docker-compose.prod.yml down								#остановить сервер, порт 80 д.б. свободен
@@ -108,6 +122,9 @@ certbot certonly -d dev.deliverysolution.site								#(sudo) обновить с
 docker-compose -f docker-compose.prod.yml up --build -d 						#запкстить контейнеры 
 https://trueconf.ru/blog/baza-znaniy/sozdanie-sertifikata-lets-encrypt-na-linux.html			#получить и обновить сертификат на сервере
 https://pentacent.medium.com/nginx-and-lets-encrypt-with-docker-in-less-than-5-minutes-b4b8a60d3a71  	#docker-nginx-certbot
+# wildcard на поддомены
+https://www.digitalocean.com/community/tutorials/how-to-create-let-s-encrypt-wildcard-certificates-with-certbot
+sudo certbot certonly   --dns-digitalocean   --dns-digitalocean-credentials ~/certbot-creds.ini   -d 'deliverysolution.site' -d '*.deliverysolution.site'
 ___________________________________________________
 https://habr.com/ru/post/579336/ спарсить любой сайт
 
@@ -129,3 +146,29 @@ docker exec -it 4540739de5b0 psql -U delivery -c "CREATE DATABASE delivery_db;"
 -----------------------------------------------------------
 https://pentacent.medium.com/nginx-and-lets-encrypt-with-docker-in-less-than-5-minutes-b4b8a60d3a71
 https://www.nginx.com/blog/using-free-ssltls-certificates-from-lets-encrypt-with-nginx/
+
+Например, для Chrome необходимо зайти по адресу chrome://net-internals/#hsts и удалить домен через раздел «Delete domain security policies». 
+Достаточно вписать свой адрес домена в поле «Domain» и нажать «Delete».
+---------------traefik-------------------------------
+docker restart traefik
+docker logs -f traefik
+chmod 600 ./acme.json
+cd ./traefik
+touch ./acme.json
+chmod 600 ./acme.json
+docker-compose -f docker-compose.traefik.yml up -d
+cd ..
+docker-compose -f docker-compose.prod.real.yml up -d
+
+https://bitbucket.org/blog/ssh-host-key-changes	#изменить ключ доступа bitbucket
+
+#ускорение django
+https://habr.com/ru/companies/first/articles/728792/
+
+-----------goDaddy API---------------------
+3mM44Uch7TEK8j_TAVH33ys6XCw9SZaCmkvPX
+#secret
+WGTTEfsuum4afDsQVe741n
+
+curl -X GET -H "Authorization: sso-key 3mM44Uch7TEK8j_TAVH33ys6XCw9SZaCmkvPX:WGTTEfsuum4afDsQVe741n" "https://api.godaddy.com/v1/domains/available?domain=example.guru"
+curl -X GET -H "Authorization: sso-key 3mM44Uch7TEK8j_TAVH33ys6XCw9SZaCmkvPX:WGTTEfsuum4afDsQVe741n" "https://api.ote-godaddy.com/v1/domains/available?domain=example.guru"

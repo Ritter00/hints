@@ -1,0 +1,43 @@
+version: '3.8'
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./:/delivery-solution/
+    ports:
+      - 8000:8000
+    env_file:
+      - ./.env.dev
+    depends_on:
+      - db
+  db:
+    image: postgres:12.8-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=trust
+      - POSTGRES_USER=delivery
+      - POSTGRES_PASSWORD=delivery_pass
+      - POSTGRES_DB=delivery_db
+  redis:
+    image: "redis:alpine"
+    expose:
+      - 6379
+  celery:
+    restart: always
+    build:
+      context: .
+    command: celery -A proj worker -l info
+    env_file:
+      - ./.env.dev
+    volumes:
+      - ./:/delivery-solution/
+    depends_on:
+      - db
+      - redis
+      - web
+volumes:
+  postgres_data:

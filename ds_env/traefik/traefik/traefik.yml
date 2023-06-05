@@ -1,0 +1,24 @@
+entryPoints:
+    http:
+        address: ":80"
+    https:
+        address: ":443"
+
+certificatesResolvers:
+    lets_encrypt:
+        acme:
+            email: aleh.zimnokha@aimtalk.me
+            storage: "/etc/traefik/acme.json"
+            httpChallenge:
+                entryPoint: http
+
+api:
+    dashboard: false
+
+log:
+    level: DEBUG
+
+providers:
+    file:
+        directory: /etc/traefik/custom
+        watch: true

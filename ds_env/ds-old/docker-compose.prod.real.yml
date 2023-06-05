@@ -1,0 +1,101 @@
+version: '3.3'
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    command: gunicorn --bind 0.0.0.0:8000 --reload proj.wsgi:application
+    networks:
+      nginx_net:
+    volumes:
+      - static_volume:/usr/src/delivery-solution/web/staticfiles
+      - media_volume:/usr/src/delivery-solution/web/media
+      - ./:/usr/src/delivery-solution/web/
+    expose:
+      - 8000
+    env_file:
+      - ./.env.prod.real
+    depends_on:
+      - db
+  db:
+    image: postgres:12.8-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD
+      - POSTGRES_USER=delivery
+      - POSTGRES_PASSWORD=delivery_pass
+      - POSTGRES_DB=delivery_db
+    networks:
+      nginx_net:
+    env_file:
+      - ./.env.prod.db
+  redis:
+    image: "redis:alpine"
+    expose:
+      - 6379
+    networks:
+      nginx_net:
+  celery:
+    restart: always
+    build:
+      context: .
+    command: celery -A proj worker -l info
+    env_file:
+      - ./.env.dev
+    volumes:
+      - ./:/delivery-solution/
+    depends_on:
+      - db
+      - redis
+      - web
+    networks:
+      nginx_net:
+  nginx:
+    build: 
+      context: ./nginx
+      dockerfile: Dockerfile.prod
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+    volumes:
+      - static_volume:/usr/src/delivery-solution/web/staticfiles
+      - media_volume:/usr/src/delivery-solution/web/media
+      - /etc/letsencrypt:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/certbot
+      - dhparam:/etc/ssl/certs
+    ports:
+      - 80:80
+      - 443:443
+    networks:
+      nginx_net:
+    depends_on:
+      - web
+  certbot:
+    container_name: certbot
+    restart: unless-stopped
+    entrypoint:  "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    networks:
+      nginx_net:
+    image: certbot/certbot
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/certbot:rw
+
+# networking for the Redis container
+networks:
+  nginx_net:
+    name: nginx_net
+volumes:
+  postgres_data:
+  media_volume:
+    driver: local
+    driver_opts:
+      type: none
+      device: /usr/src/delivery-solution/media
+      o: bind
+  static_volume:
+  dhparam:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./dhparam
+      o: bind

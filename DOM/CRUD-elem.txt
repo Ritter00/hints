@@ -1,0 +1,23 @@
+#---------УДАЛИТЬ--------дочерние элементы JS & jQuery
+const parentElement = document.getElementById('parent');
+while (parentElement.firstChild) {
+    parentElement.removeChild(parentElement.firstChild);
+}
+#jQuery
+$("#myDiv").empty();
+
+#--------СОЗДАТЬ---НАСТРОИТЬ-------элемент JS & jQuery
+const newElement = document.createElement('div');
+
+newElement.setAttribute('class', 'my-class');
+newElement.textContent = 'Новый элемент';
+#jQuery
+var $newElements = $('<div>1</div><div>2</div><div>3</div>');
+$('#my-container').append($newElements);
+
+#-------ВСТАВИТЬ------
+const parentElement = document.querySelector('#parent-element');
+parentElement.appendChild(newElement);
+$('#my-container').append($newElements);
+
+
