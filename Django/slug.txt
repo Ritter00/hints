@@ -1,0 +1,20 @@
+#pip install pytils
+Pytils is a Russian-specific string utils (transliteration, numeral is words, russian dates, etc)
+Pytils это инструменты для работы с русскими строками (транслитерация, числительные словами, русские даты и т.д.)
+
+from pytils.translit import slugify
+
+slug = models.SlugField(max_length=255, db_index=True, verbose_name="URL адрес", default="", blank=True)
+
+def _generate_unique_slug(self):
+        unique_slug = slugify(self.name[:100])
+        num = 1
+        while Product.objects.filter(slug=unique_slug).exists():
+            unique_slug = '{}-{}'.format(unique_slug, num)
+            num += 1
+        return unique_slug
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = self._generate_unique_slug()
+        super().save(*args, **kwargs)

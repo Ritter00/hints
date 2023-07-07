@@ -1,21 +1,6 @@
-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
-hJfy7mJ8bUraQWx - aleh.zimnokha@aimtalk.me
 admin3@admin.admin - vber#%TverASF6
 admin1@admin.admin - BOUN234trASD786
 https://habr.com/ru/post/341704/
-https://vh82.hoster.by:2083/ - хостинг
-visemby
-Aesae1ia
-https://dev.visem.by/admin/
-login: admin
-pass: viSem!2022
-seologic -> seologic@seologic.com -> Hj45#4&==dosAW
-
-https://my.deliverysolution.site/login
-mmolokovskikh@gmail.com
-g75btyf6uz
-# токен  для DigitalOcean
-dop_v1_0516a3f6026a8fe3f2acdfd69b4f4c01d80456951472d7c2e351f6a3c8ebbea0
 ---------ДОСТУП к СЕРВЕРАМ--------------------------------------------------
 sudo ssh -i "kk/ds_prod" ubuntu@51.250.92.135		# ru
 ssh -i "kk/ds_prod" root@165.227.155.121		# dev site
@@ -48,8 +33,9 @@ chmod o+xrw $(find *.jpg)		# найти и назначить права
 docker-compose up --force-recreate
 
 docker-compose exec web python manage.py shell
-from accounts.models import Account
-Account.objects.all()
+from shop.models import Product
+pr = Product.objects.all()
+for p in pr: p.save()
 
 sudo chmod 777 db_django	#права удалить папку
 sudo rm -r db_django/
@@ -59,16 +45,22 @@ docker stop $(docker ps -a -q)
 docker rm $(docker ps -a -q)
 docker system prune --volumes	#очистить образы
 
-------дамп с сервера на локалку висем-----------------
+------	ДАМП с сервера на локалку ВИСЕМ -----------------
 source /home/visemby/virtualenv/dev.visem.by/3.8/bin/activate && cd /home/visemby/dev.visem.by			#виртульное окр на сервере
-mysqldump --no-tablespaces -u visemby_visem_dev --password=visem_a1zahOeR9kcef visemby_dev > dump31_10_22.sql   # сделать дамп БД на дев-висем
+mysqldump --no-tablespaces -u visemby_visem_dev --password=visem_a1zahOeR9kcef visemby_dev > dump22_06_23.sql   # сделать дамп БД на дев-висем
+
+source /home/visemby/virtualenv/visem.by/3.8/bin/activate && cd /home/visemby/visem.by				#prod
+mysqldump --no-tablespaces -u visemby_visemby --password=visem_dd2dda1GWzahOeR9kcef visemby_visemby > dump05_07_23.sql
+
 														#скачать и загрузить в корень проекта
 sudo rm -r db_django/												#удалить БД
 docker system prune --volumes											#очистить образы чистит все
-docker-compose up --build											#заново собрать 
-docker-compose exec web python manage.py makemigrations		# во втором терминале
+#удалить контейнер с базой данных
+docker-compose up --build											#заново собрать
+# перед загрузкой дампа сделать миграции											 
+docker-compose exec web python manage.py makemigrations								# во втором терминале
 docker-compose exec web python manage.py migrate
-cat dump31_10_22.sql | docker exec -i b367287b312f /usr/bin/mysql -u root --password=password db_django		#загрузить бд(номер контейнера взять свой - b367287b312f)
+cat dump05_07_23.sql | docker exec -i 890c440b79a30311016da04fbed918e5db6ec5b89f665b0089f4eb61e2323c3b /usr/bin/mysql -u root --password=password db_django		#загрузить бд(номер контейнера взять свой - b367287b312f)
 -----------------------------------------------------------
 
 cat dump07_06_22.sql | docker exec -i 945cb1dc8ecc /usr/bin/mysql -u root --password=password db_django 	# загрузить дамп памяти backup.sql
@@ -80,7 +72,7 @@ cat dump_migrator_10.july.2022.sql | docker exec -i 1fdf480233db psql --username
 docker exec -i 1fdf480233db psql --username delivery delivery_db < dump_migrator_10.july.2022.sql
 docker exec -it 4540739de5b0 dropdb delivery_db -U delivery						#KILL db DS
 
-mysqldump --no-tablespaces -u visemby_visem_dev --password=visem_a1zahOeR9kcef visemby_dev > dump31_10_22.sql  # сделать дамп БД на дев-висем
+mysqldump --no-tablespaces -u visemby_visem_dev --password=visem_a1zahOeR9kcef visemby_dev > dump22_06_23.sql  # сделать дамп БД на дев-висем
 
 send_mail('subject', 'body of the message', 'postmaster@mail.deliverysolution.site', ['django.test.ds.183@gmail.co'])
 ------------Parser + cron --------------------------------------
@@ -163,12 +155,4 @@ docker-compose -f docker-compose.prod.real.yml up -d
 https://bitbucket.org/blog/ssh-host-key-changes	#изменить ключ доступа bitbucket
 
 #ускорение django
-https://habr.com/ru/companies/first/articles/728792/
-
------------goDaddy API---------------------
-3mM44Uch7TEK8j_TAVH33ys6XCw9SZaCmkvPX
-#secret
-WGTTEfsuum4afDsQVe741n
-
-curl -X GET -H "Authorization: sso-key 3mM44Uch7TEK8j_TAVH33ys6XCw9SZaCmkvPX:WGTTEfsuum4afDsQVe741n" "https://api.godaddy.com/v1/domains/available?domain=example.guru"
-curl -X GET -H "Authorization: sso-key 3mM44Uch7TEK8j_TAVH33ys6XCw9SZaCmkvPX:WGTTEfsuum4afDsQVe741n" "https://api.ote-godaddy.com/v1/domains/available?domain=example.guru"
+https://habr.com/ru/companies/first/articles/728792/ation: sso-key 3mM44Uch7TEK8j_TAVH33ys6XCw9SZaCmkvPX:WGTTEfsuum4afDsQVe741n" "https://api.ote-godaddy.com/v1/domains/available?domain=example.guru"

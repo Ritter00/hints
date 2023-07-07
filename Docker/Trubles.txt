@@ -1,3 +1,4 @@
 C:\Users\admin\AppData\Roaming>rd/S Docker		# удалить папку докер
 cd C:\Users\admin\AppData\Roaming
 rd/S Docker
+C:\Users\admin\.docker\features.json			# удалить
