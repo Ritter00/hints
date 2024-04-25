@@ -1,0 +1,1 @@
+https://habr.com/ru/companies/first/articles/728792/ #Python Дайджест: как ускорить Django проект до (почти) максимума

@@ -1,0 +1,14 @@
+python manage.py shell
+import os
+from shop.models import Product, ProductImage
+p = Product.objects.all()
+pi = ProductImage.objects.all()
+pi[0].image.path
+list_images = []
+for i in pi:
+	list_images.append(i.image.name.split('/')[-1])
+t = os.listdir(path="/home/visemby/public_html/media/product_images/")
+for i in t:
+	if i not in list_images:os.remove('/home/visemby/public_html/media/product_images/'+i)
+
+

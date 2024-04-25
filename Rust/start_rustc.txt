@@ -1,0 +1,139 @@
+------------Install---------
+$ curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf | sh
+
+$ rustc main.rs			# скомпилировать файл
+$ ./main			# запустить
+--------- New Proj--------------
+$ cargo new hello_cargo		# project name - hello_cargo
+$ cargo build			# собрать проект
+$ cargo build --release		# собрать проект для релиза (работает быстрее, собирается дольше, собирает в target/release )
+$ ./target/debug/hello_cargo	# запустить файл
+$ cargo run			# собрать проект сразу запустить файл (аналог cargo build и ./target/debug/hello_cargo)
+$ cargo run -p adder		# запустить конкретный крейт
+$ cargo test
+$ RUST_BACKTRACE=1 cargo run	# запуск с переменной для трассировки ошибок
+$ cargo check			# быстро проверяет ваш код, чтобы убедиться, что он компилируется, но не создаёт исполняемый файл
+---------- Variables-------------
+let x = 4; 			# обьявление неизменяемой переменной
+let mut x = 4;			# обьявление изменяемой переменной
+let num: u32 = 4;		# обьявление переменной и её типа
+const THIS_IS_CONST: u32 = 32;	# обьявление постоянной переменной и её типа
+Целочисленный тип (integer) 				- u8, u16, u32, u64, u128, usize (u8 вмещает значение до 255)
+Целочисленный тип (integer) со знаком( например "-25") 	- i8, i16, i32, i64, u128, isize (i8 вмещает значение от -128 до 127)
+Числа с плавающей запятой				- f32 or f64 (по умолчанию f64), let num: f32 = 2.0;
+Логический тип						- bool (true or false) , let truth: bool = false;
+Символьный тип						- char (одинарные кавычки!!!!) , let z: char = 'X'; let heart_eyed_cat = '😻';
+Кортеж							- let tup: (i32, f64, u8) = (500, 6.4, 1); let tup = (500, 6.4, 1); let (x, y, z) = tup; доступ по индексу tup.0
+Mассив array						- let a = [1, 2, 3, 4, 5]; let a: [i32; 5] = [1, 2, 3, 4, 5]; let a = [3; 5]; доступ по индексу a[0]; fn func(list: [i32]){--do something--}
+---------------Function-----------
+fn main() {
+    print_labeled_measurement(5, 'h');
+}
+fn print_labeled_measurement(value: i32, unit_label: char) {
+    println!("The measurement is: {value}{unit_label}");
+}
+fn plus_one(x: i32) -> i32 {
+    x + 1
+}
+---------------Struct---------------
+#[derive(Debug)]
+struct User {
+    active: bool,
+    username: String,
+    email: String,
+    sign_in_count: u64,
+}
+impl Rectangle {
+    fn area2(&self) -> u32 {
+        self.widht * self.height
+    }
+}
+-----------Vector-----------------
+let v: Vec<i32> = Vec::new();
+let v = vec![1, 2, 3,4,5];
+let third: &i32 = &v[2];
+let third: Option<&i32> = v.get(2);	#мы получаем тип Option<&T>
+fn main() {
+    enum SpreadsheetCell {
+        Int(i32),
+        Float(f64),
+        Text(String),
+    }
+
+    let row = vec![
+        SpreadsheetCell::Int(3),
+        SpreadsheetCell::Text(String::from("blue")),
+        SpreadsheetCell::Float(10.12),
+    ];
+}
+v.push(5), pop & etc.
+-----------String-----------------
+let mut s = String::new();
+let data = "initial contents"; let s = data.to_string();
+let s = "initial contents".to_string();
+let s = String::from("initial contents");
+s.push_str("bar");						#добавляет строковый срез к s
+s.push('l');							#добавляет только один элемент к s
+let s3 = s1 + &s2;						#обьединяет
+let s = format!("{s1}-{s2}-{s3}");				#обьединяет
+for c in "Зд".chars() {
+    println!("{c}");
+}								#доступ к символам
+----------HashMap---------------------
+use std::collections::HashMap;
+let mut scores = HashMap::new();
+scores.insert(String::from("Blue"), 10);
+let team_name = String::from("Blue");
+let score = scores.get(&team_name).copied().unwrap_or(0);
+for (key, value) in &scores {
+        println!("{key}: {value}");
+    }
+scores.entry(String::from("Blue")).or_insert(50);		#Вставить 50 , если нет еще значения, если есть - ничего не вставлять
+---------File-----------------------
+use std::fs::File;
+use std::io::{self, Read};
+use std::fs;
+fs::read_to_string("hello.txt");				#открывает файл, создаёт новую String, читает содержимое файла, размещает его в String и возвращает её
+let greeting_file_result = File::open("hello.txt");
+-------Error-----------------------
+use std::io::ErrorKind;
+let greeting_file_result = File::open("hello.txt");
+let greeting_file = match greeting_file_result {
+        Ok(file) => file,
+        Err(error) => match error.kind() {
+            ErrorKind::NotFound => match File::create("hello.txt") {
+                Ok(fc) => fc,
+                Err(e) => panic!("Problem creating the file: {:?}", e)
+            },
+            other_error => {
+                panic!("Problem opening the file: {:?}", error)
+            }
+        },
+    };
+let mut username_file = File::open("hello.txt")?;		#короткая форма "?", для обработки (только для Result)
+
+----------Option<T>---------------------------------		# методы https://doc.rust-lang.org/std/option/enum.Option.html#method.unwrap_or_else
+x.unwrap()
+Some("car").unwrap_or("bike")
+Some(4).unwrap_or_else(|| 2 * k)
+-----------Итератор--------------------------------
+v1.iter();						# создаёт итератор по неизменяемым ссылкам
+v1.into_iter()						# становится владельцем v1 и возвращает принадлежащие ему значения
+v1.iter_mut()						# если мы хотим перебирать изменяемые ссылки
+let v1_iter = v1.iter(); 
+v1_iter.sum();
+let v1: Vec<i32> = vec![1, 2, 3];
+let v2: Vec<_> = v1.iter().map(|x| x + 1).collect();
+-------------Многопоточность------------------------
+use std::thread;
+let handle = thread::spawn(|| { do smth });		# запустить паралелльный поток
+handle.join().unwrap();					# дождаться выполнения потока
+use std::sync::mpsc;					# передача сообщений между потоками
+let (tx, rx) = mpsc::channel();
+-------------Шаблоны-------------------------------
+let x = 1;
+match x {
+        1 => println!("one"),				# 1 | 2 => (), 1..=5 =>(),
+        2 => println!("two"),
+        _ => println!("anything"),			#.. => (),
+    }

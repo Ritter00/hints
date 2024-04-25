@@ -5,6 +5,11 @@ https://djangodoc.ru/
 https://pocoz.gitbooks.io/django-v-primerah/content/ 		# Джанго в примерах
 https://www.reg.ru/blog/shpargalka-po-python-dlya-django/ 	# Шпаргалка по Python для Django
 
+# create .gitignore
+curl https://raw.githubusercontent.com/github/gitignore/master/Python.gitignore --output .gitignore
+# create .dockerignore
+curl https://gist.githubusercontent.com/KernelA/04b4d7691f28e264f72e76cfd724d448/raw/f17a09be647c71dd77c53f919705196995d09cab/.dockerignore --output .dockerignore
+
 python -m venv venv     	# создаем виртуальное окружение, с названием "venv"
 python3 -m venv venv		# linux (apt install python3.8-venv)
 venv\scripts\activate    	# активируем его 

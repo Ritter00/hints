@@ -1,0 +1,21 @@
+$ mkdir prj
+python3 -m venv venv
+source venv/bin/activate
+pip install django
+django-admin startproject prj .
+python manage.py migrate
+python manage.py runserver
+# остановить сервер CTRL+C
+pip freeze > requirements.txt
+deactivate
+rm -r venv/
+touch Dockerfile
+touch docker-compose.yml
+touch .env.dev
+docker-compose build
+docker-compose up -d
+docker-compose up -d --build
+docker-compose exec web python manage.py migrate --noinput
+touch entrypoint.sh
+docker-compose exec web python manage.py createsuperuser
+docker-compose exec web python manage.py startapp adverts

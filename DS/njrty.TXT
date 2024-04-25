@@ -1,10 +1,13 @@
 admin3@admin.admin - vber#%TverASF6
 admin1@admin.admin - BOUN234trASD786
 https://habr.com/ru/post/341704/
+
+docker-compose exec web pip install django-two-factor-auth
 ---------ДОСТУП к СЕРВЕРАМ--------------------------------------------------
 sudo ssh -i "kk/ds_prod" ubuntu@51.250.92.135		# ru
 ssh -i "kk/ds_prod" root@165.227.155.121		# dev site
 ssh -i "kk/ds_prod" root@165.22.64.66			# prod
+ssh -i "kk/ds_prod" root@159.223.18.109			# aimtalk
 /home/ritter00/kk
 ------------------ЯНДЕКС CLOUD-----------------------------------------------
 git pull
@@ -25,7 +28,9 @@ docker-compose exec web django-admin compilemessages		# применение
 docker-compose exec web pip install django-modeltranslation
 docker-compose exec web pip freeze > requirements.txt
 ------------STRIPE WEBHOOK------------------------------------------------------
+./stripe login
 ./stripe listen --forward-to localhost:8000/webhook/
+ngrok http http://localhost:8000
 
 docker exec -it 16f67df7da20 /bin/bash	# доступ в контейнер
 chmod o+xrw $(find *.jpg)		# найти и назначить права
@@ -33,9 +38,10 @@ chmod o+xrw $(find *.jpg)		# найти и назначить права
 docker-compose up --force-recreate
 
 docker-compose exec web python manage.py shell
-from shop.models import Product
-pr = Product.objects.all()
-for p in pr: p.save()
+
+from management.check import resize_image as res
+res(0, max_size=(400,400), quality='web_high')
+res(2, max_size=(1366,490), quality='web_high')
 
 sudo chmod 777 db_django	#права удалить папку
 sudo rm -r db_django/
@@ -50,7 +56,7 @@ source /home/visemby/virtualenv/dev.visem.by/3.8/bin/activate && cd /home/visemb
 mysqldump --no-tablespaces -u visemby_visem_dev --password=visem_a1zahOeR9kcef visemby_dev > dump22_06_23.sql   # сделать дамп БД на дев-висем
 
 source /home/visemby/virtualenv/visem.by/3.8/bin/activate && cd /home/visemby/visem.by				#prod
-mysqldump --no-tablespaces -u visemby_visemby --password=visem_dd2dda1GWzahOeR9kcef visemby_visemby > dump05_07_23.sql
+mysqldump --no-tablespaces -u visemby_visemby --password=visem_dd2dda1GWzahOeR9kcef visemby_visemby > dump09_01_24.sql
 
 														#скачать и загрузить в корень проекта
 sudo rm -r db_django/												#удалить БД
@@ -60,7 +66,7 @@ docker-compose up --build											#заново собрать
 # перед загрузкой дампа сделать миграции											 
 docker-compose exec web python manage.py makemigrations								# во втором терминале
 docker-compose exec web python manage.py migrate
-cat dump05_07_23.sql | docker exec -i 890c440b79a30311016da04fbed918e5db6ec5b89f665b0089f4eb61e2323c3b /usr/bin/mysql -u root --password=password db_django		#загрузить бд(номер контейнера взять свой - b367287b312f)
+cat dump09_01_24.sql | docker exec -i d4ac161d9dd1 /usr/bin/mysql -u root --password=password db_django		#загрузить бд(номер контейнера взять свой - b367287b312f)
 -----------------------------------------------------------
 
 cat dump07_06_22.sql | docker exec -i 945cb1dc8ecc /usr/bin/mysql -u root --password=password db_django 	# загрузить дамп памяти backup.sql
@@ -69,12 +75,12 @@ docker exec 0d5a544509f7 /usr/bin/mysqldump -u root --password=password db_djang
 docker exec 1c4bba058f81 /usr/bin/mysqldump -u root --password=password db_django > backup_6_june_2022_adr.sql
 
 cat dump_migrator_10.july.2022.sql | docker exec -i 1fdf480233db psql --username delivery delivery_db	#DS
-docker exec -i 1fdf480233db psql --username delivery delivery_db < dump_migrator_10.july.2022.sql
+docker exec -i b0229a6d7fbe psql --username delivery delivery_db < dump_migrator_02.01.2024.sql
 docker exec -it 4540739de5b0 dropdb delivery_db -U delivery						#KILL db DS
 
 mysqldump --no-tablespaces -u visemby_visem_dev --password=visem_a1zahOeR9kcef visemby_dev > dump22_06_23.sql  # сделать дамп БД на дев-висем
 
-send_mail('subject', 'body of the message', 'postmaster@mail.deliverysolution.site', ['django.test.ds.183@gmail.co'])
+send_mail('subject', 'body of the message', 'postmaster@mail.deliverysolution.site', ['django.test.ds.183@gmail.com'])
 ------------Parser + cron --------------------------------------
 docker-compose exec web python manage.py shell
 docker-compose exec web python manage.py parse_products		# парсинг товаров Висем
@@ -83,10 +89,11 @@ source /home/visemby/virtualenv/dev.visem.by/3.8/bin/activate && cd /home/visemb
 ---Деплой Висем------------------------------------serve
 source /home/visemby/virtualenv/dev.visem.by/3.8/bin/activate && cd /home/visemby/dev.visem.by	#виртульное окр
 git pull origin dev
-ssh password на хостинге - visem
+ssh password на хостинге - visem(visem123456)
 python manage.py migrate
 pip install -r requirements.txt
 затем перезагружаешь приложение и обнуляешь passenger
+python manage.py collectstatic
 git restore passenger_wsgi.py
 ---------------------------CI/CD--------------------------------------
 https://medium.com/swlh/how-to-deploy-your-application-to-digital-ocean-using-github-actions-and-save-up-on-ci-cd-costs-74b7315facc2

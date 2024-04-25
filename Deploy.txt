@@ -1,0 +1,49 @@
+#Digital Ocean and GitHub CI/CD
+https://medium.com/swlh/how-to-deploy-your-application-to-digital-ocean-using-github-actions-and-save-up-on-ci-cd-costs-74b7315facc2
+-create droplet
+---------ssh into the server----------
+ssh user@ip		# ssh -i "kk/ds_prod" root@159.223.18.109
+ssh-keygen		# create keys (Enter x 3)
+
+Copy your server pubic key and add it to you GitHub ssh and gpg keys list,this will enable the repository to be cloned from GitHub to the server.
+https://docs.github.com/ru/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account
+
+cat .ssh/id_rsa.pub		#copy key
+add the key to yours/settings/SSH AND GPG KEYS or organization/settings/Deploy keys
+#on terminal DO
+nano .ssh/authorized_keys	#paste the copied public ssh key
+Control+X 			#and accept changes
+chmod 700 .ssh/authorized_keys	#to give permission to keys in that folder to perform ssh tasks
+git clone git@github.com:Aimtalk-me/aimtalk.git	#copy repo if you need
+#on GitHub
+settings/secrets and variables/Actions 
+create var SSH_HOST = 159.223.18.109
+create var SSH_KEY = (cat ~/.ssh/id_rsa)
+create var SSH_USERNAME = root
+#create file .github/workflows/deploy.yaml
+name: Deploy pre-prod
+on:
+    push:
+        branches: [main]
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Remote SSH Commands
+              uses: fifsky/ssh-action@master
+              with:
+                  command: |
+                      cd ../usr/src/aimtalk
+                      git status
+                      git pull origin main
+                      docker-compose -f docker-compose.prod.yml down
+                      docker-compose -f docker-compose.prod.yml up --build -d
+                      docker-compose -f docker-compose.prod.yml exec web python manage.py migrate &&
+                      docker-compose -f docker-compose.prod.yml exec web python manage.py collectstatic --no-input --clear &&
+                      docker system prune -f --all &&
+                      exit
+                  host: ${{ secrets.SSH_HOST }}
+                  user: ${{ secrets.SSH_USERNAME }}
+                  key: ${{ secrets.SSH_KEY }}
+                  args: "-tt"

@@ -1,0 +1,4 @@
+# Для докер компос добавить впереди docker-compose exec redis, где redis название контейнера
+
+redis-cli lrange celery 0 100	# просмотреть первые 100 задач в очереди в Redis
+redis-cli HGETALL unacked	# Посмотреть, какие задачи находятся в очереди ETA в Redis

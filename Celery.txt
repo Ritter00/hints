@@ -1,0 +1,5 @@
+from core.tasks import backup_db_v2
+t = backup_db_v2.delay()		#выполнить задачу
+
+celery -A proj inspect scheduled	#проверить список периодических задач + docker-compose exec celery celery -A proj inspect scheduled
+celery -A proj inspect conf		#проверить конфигурацию + docker-compose exec celery celery -A proj inspect conf

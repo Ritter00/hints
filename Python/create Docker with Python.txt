@@ -1,0 +1,20 @@
+#Dockerfile
+FROM python:3.12.3-alpine3.19
+WORKDIR /app
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+RUN pip install --upgrade pip
+#RUN adduser -D ritter00
+#USER ritter00
+COPY . .
+CMD ["/bin/sh"]
+
+#next
+docker build -t name .
+docker run -v $(pwd):/app:rw --rm -it name
+#or
+docker run -v $(pwd):/app:rw -it name
+
+pip install django
+pip freeze > requirements.txt
+django-admin startproject project .

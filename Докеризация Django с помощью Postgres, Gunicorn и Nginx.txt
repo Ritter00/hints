@@ -1,5 +1,11 @@
 https://django.fun/tutorials/dokerizaciya-django-s-pomoshyu-postgres-gunicorn-i-nginx/
+https://django.fun/articles/tutorials/dokerizaciya-django-s-pomoshyu-postgres-gunicorn-i-nginx/
 https://mherman.org/presentations/dockercon-2018/#1
+
+# create .gitignore
+curl https://raw.githubusercontent.com/github/gitignore/master/Python.gitignore --output .gitignore
+# create .dockerignore
+curl https://gist.githubusercontent.com/KernelA/04b4d7691f28e264f72e76cfd724d448/raw/f17a09be647c71dd77c53f919705196995d09cab/.dockerignore --output .dockerignore
 
  $ mkdir django-on-docker && cd django-on-docker
  $ mkdir app && cd app
@@ -9,7 +15,7 @@ https://mherman.org/presentations/dockercon-2018/#1
  (env)$
  
  (env)$ pip install django==3.2.6
- (env)$ django-admin.py startproject hello_django .
+ (env)$ django-admin.py startproject hello_django . (django-admin startproject hello_django .)
  (env)$ python manage.py migrate
  (env)$ python manage.py runserver
 

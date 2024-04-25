@@ -60,6 +60,11 @@ git log --oneline --all #Вывести все комитеты в ветке в
 Заменить локальный репозиторий на удаленный:
 git reset --hard origin/main
 git pull
+
+Заменить репозиторий на другой (изменить адрес репозитория):
+git remote -v 									# смотрим текущие ссылки на удаленный репозиторий
+git remote set-url origin https://github.com/USERNAME/REPOSITORY_NEW.git
+git remote set-url origin git@bitbucket.org:maksiklimenko/visem.git
 ________________________________________________________________________________________________________________
 запусть HTML
 http://raw.githack.com/

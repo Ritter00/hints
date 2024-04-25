@@ -1,0 +1,1 @@
+https://tproger.ru/articles/dockerize-python-sozdajom-obraz-docker-iz-prilozhenija-na-python
