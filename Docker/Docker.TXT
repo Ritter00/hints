@@ -64,3 +64,10 @@ docker exec 431a3b3fc24b nginx -s reload	# перечитывание конфи
 -----------------------------
 
 Docker system prune -a		# Очистка всего и сразу
+docker system df		# посмотреть, сколько места занимают различные Docker-объекты
+docker ps -as			# посмотреть, сколько места занимают различные Docker-containers
+-----------Уменьшить файл docker_data.vhdx---------------------------
+# in powershell with admin permissions
+wsl --shutdown
+Optimize-VHD -Path "C:\Users\admin\AppData\Local\Docker\wsl\disk\docker_data.vhdx" -Mode Full
+wsl	#запустить 

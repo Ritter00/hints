@@ -1,2 +1,17 @@
 https://docs.microsoft.com/en-us/windows/wsl/setup/environment
 \\wsl$	# все доступные дистрибутивы Linux и их корневые файловые системы в проводнике Windows, в адресной строке введите
+
+# in PowerShell (admin access)
+wsl --shutdown
+wsl
+# in C:\Users\admin\.wslconfig     - create if it's needed
+[wsl2]
+memory=8GB  # Выделить 8 ГБ для WSL2
+processors=4  # Выделить 4 ядра
+swap=4GB  # Увеличить файл подкачки до 4 ГБ
+localhostForwarding=true
+
+# in unix
+free -h			# проверить ресурсы
+
+

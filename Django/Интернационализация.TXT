@@ -14,7 +14,8 @@ RUN apk --update add \
 LOCALE_PATH = [os.path.join(BASE_DIR, 'locale')]
 
 в ШАБЛОНах обернуть {% trans 'word' %} и вкаждом шаблоне {% load i18n %}
-
+создать в корне папку "locale"
+sudo chown -R ritter00:ritter00 locale
 python manage.py makemessages -l ru	#делаем перевод, вместо ru -(en - и др. можно ставить)~ docker-compose exec web django-admin makemessages -l en
 django-admin makemessages -l en		# то же
 Затем записываем в сгенерированный файл django.po перевод 
