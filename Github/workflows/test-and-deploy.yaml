@@ -1,0 +1,147 @@
+name: Test and Deploy
+
+on:
+  push:
+    branches:
+      #- main
+      #- deploy-devserver-ci-cd
+      - develop
+jobs:
+  test:
+    name: Run Django Tests
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgis/postgis:17-3.5
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpass
+          POSTGRES_DB: testdb
+        options: >-
+          --health-cmd "pg_isready -U testuser -d testdb"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      elasticsearch:
+        image: docker.elastic.co/elasticsearch/elasticsearch:8.16.0
+        ports:
+          - 9200:9200
+          - 9300:9300
+        env:
+          discovery.type: single-node
+          xpack.security.enabled: false
+        options: >-
+          --health-cmd="curl -f http://localhost:9200/_cluster/health || exit 1"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.12
+
+      # Step 3: Install GDAL and other dependencies
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gdal-bin libgdal-dev
+          export CPLUS_INCLUDE_PATH=/usr/include/gdal
+          export C_INCLUDE_PATH=/usr/include/gdal
+
+      # Step 4: Install Python dependencies
+      - name: Install Python dependencies
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-django
+
+      # Step 5: Set environment variables
+      - name: Set environment variables
+        run: |
+          echo "DJANGO_SETTINGS_MODULE=settings.settings" >> $GITHUB_ENV
+          echo "DATABASE_URL=postgres://testuser:testpass@localhost:5432/testdb" >> $GITHUB_ENV
+          echo "GDAL_LIBRARY_PATH=/usr/lib/libgdal.so" >> $GITHUB_ENV
+          echo "GITHUB_ACTIONS=true" >> $GITHUB_ENV
+          echo "POSTGRES_USER=testuser" >> $GITHUB_ENV
+          echo "POSTGRES_PASSWORD=testpass" >> $GITHUB_ENV
+          echo "POSTGRES_DB=testdb" >> $GITHUB_ENV
+          echo "POSTGRES_HOST=localhost" >> $GITHUB_ENV
+          
+      # Step 6: Wait for PostgreSQL
+      - name: Wait for PostgreSQL
+        run: |
+            until pg_isready -h localhost -p 5432 -U testuser; do
+              echo "Waiting for database..."
+              sleep 13
+            done
+      # Step 7: Wait for Elasticsearch
+      - name: Wait for Elasticsearch
+        run: |
+            until curl -f http://localhost:9200/_cluster/health; do
+              echo "Waiting for Elasticsearch..."
+              sleep 13
+            done
+
+      # Step 8: Run database migrations
+      - name: Run database migrations
+        run: |
+          source venv/bin/activate
+          python manage.py migrate
+
+      # Step 9: Run tests
+      - name: Run tests with pytest
+        run: |
+          source venv/bin/activate
+          pytest --ds=settings.settings
+
+  deploy:
+    needs: test # Only run the deployment job if the test job is successful
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Authenticate with GCP
+      - name: Authenticate with GCP
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+
+      # Step 3: Set up SSH
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      # Step 4: Deploy the application
+      - name: Deploy to GCP
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.GCP_SSH_USER }}@${{ secrets.GCP_VM_IP }} << 'EOF'
+          cd /var/prj/app
+          docker compose -f docker-compose.yml down
+          git pull origin main
+          docker compose -f docker-compose.yml up --build -d
+          EOF
+      
+      # Step 5: Cleanup
+      - name: Cleanup
+        if: always()
+        run: |
+          echo "Cleaning up temporary files..."
+          ssh -o StrictHostKeyChecking=no ${{ secrets.GCP_SSH_USER }}@${{ secrets.GCP_VM_IP }} << 'EOF'
+          docker system prune -f
+          EOF

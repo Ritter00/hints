@@ -1,0 +1,6 @@
+# сгенерируйте новый & ввести логин elastic и сгенерированный пароль в браузере
+docker exec -it <container_id> bin/elasticsearch-reset-password -u elastic
+https://localhost:9200 или http://localhost:9200
+environment:
+  - discovery.type=single-node
+  - xpack.security.enabled=false	# отключить безопастность http://localhost:9200

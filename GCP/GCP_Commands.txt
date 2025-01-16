@@ -1,0 +1,2 @@
+gcloud projects list		# view all projects
+gcloud auth list		# view all accountss

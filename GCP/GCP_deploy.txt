@@ -1,0 +1,223 @@
+Вот пошаговая инструкция по деплою приложения на сервер GCP с использованием ключа для деплоя.
+
+Подключитесь к серверу через SSH
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y git curl build-essential
+sudo adduser deploy
+sudo usermod -aG sudo deploy
+su - deploy
+ssh-keygen -t rsa -b 4096
+cat ~/.ssh/id_rsa.pub # add GitHub, перейдите в ваш репозиторий, откройте Settings → Deploy Keys.
+ssh-keyscan github.com >> ~/.ssh/known_hosts
+chmod 644 ~/.ssh/known_hosts
+sudo mkdir -p /var/www/prj
+sudo chown deploy:deploy /var/www/prj
+cd /var/www/my_project
+git clone git@github.com:<your-username>/<your-repository>.git .
+sudo nano .env
+sudo chown -R deploy:deploy deploy.sh
+sudo chown -R deploy:deploy .env
+sudo usermod -aG docker $USER
+
+
+## Шаг 1. Настройка сервера GCP
+1. **Подключитесь к серверу через SSH:**
+   Если вы используете Cloud Console, подключитесь к серверу с помощью команды:
+   gcloud compute ssh <instance-name> --zone <zone>
+   Или через любой SSH-клиент.
+
+2. **Обновите систему:**
+   Выполните команды для обновления всех пакетов:
+   sudo apt update && sudo apt upgrade -y
+
+3. **Установите необходимые утилиты:**
+   Убедитесь, что на сервере установлены Git и другие базовые утилиты:
+   sudo apt install -y git curl build-essential
+## Шаг 2. Создание пользователя для деплоя
+1. **Создайте отдельного пользователя для деплоя:**
+   sudo adduser deploy
+   sudo usermod -aG sudo deploy
+2. **Переключитесь на пользователя deploy:**
+   su - deploy
+---
+## Шаг 3. Создание пары SSH-ключей
+1. **Создайте SSH-ключ для деплоя:**
+   Выполните команду и нажмите `Enter` на всех шагах для использования стандартных путей:
+   ssh-keygen -t rsa -b 4096
+   После этого ключ будет создан в каталоге `~/.ssh/`:
+   - Приватный ключ: `~/.ssh/id_rsa`
+   - Публичный ключ: `~/.ssh/id_rsa.pub`
+
+2. **Скопируйте содержимое публичного ключа:**
+   cat ~/.ssh/id_rsa.pub
+   Сохраните вывод — он потребуется для добавления ключа на GitHub.
+---
+## Шаг 4. Настройка GitHub для деплоя
+1. **Откройте настройки репозитория:**
+   Войдите на GitHub, перейдите в ваш репозиторий, откройте **Settings** → **Deploy Keys**.
+
+2. **Добавьте ключ:**
+   - Нажмите **Add deploy key**.
+   - Вставьте содержимое публичного ключа (вывод из команды `cat ~/.ssh/id_rsa.pub`).
+   - Дайте имя ключу (например, `GCP Server Key`).
+   - Если нужно, отметьте галочку **Allow write access**.
+   - Нажмите **Add key**.
+
+---
+
+## Шаг 5. Клонирование репозитория
+1. **Добавьте GitHub в список известных хостов:**
+   ssh-keyscan github.com >> ~/.ssh/known_hosts
+   chmod 644 ~/.ssh/known_hosts
+2. **Клонируйте репозиторий:**
+   Выберите папку для размещения проекта. Например, `/var/www/my_project`:
+   sudo mkdir -p /var/www/my_project
+   sudo chown deploy:deploy /var/www/my_project
+   cd /var/www/my_project
+   git clone git@github.com:<your-username>/<your-repository>.git .
+---
+
+## Шаг 6. Настройка окружения и запуск
+1. **Установите зависимости:**
+   Если ваш проект использует Python:
+   sudo apt install -y python3 python3-pip python3-venv
+   python3 -m venv venv
+   source venv/bin/activate
+   pip install -r requirements.txt
+2. **Настройте переменные окружения:**
+   Создайте `.env` файл или экспортируйте переменные:
+   nano .env
+3. **Настройте сервер (если требуется):**
+   Если используется веб-сервер, настройте Nginx или Apache. Пример для Nginx:
+   sudo apt install -y nginx
+   sudo nano /etc/nginx/sites-available/my_project
+   Конфигурация:
+   server {
+       listen 80;
+       server_name your_domain_or_ip;
+
+       location / {
+           proxy_pass http://127.0.0.1:8000;
+           proxy_set_header Host $host;
+           proxy_set_header X-Real-IP $remote_addr;
+       }
+   }
+   Активируйте сайт и перезапустите Nginx:
+   sudo ln -s /etc/nginx/sites-available/my_project /etc/nginx/sites-enabled/
+   sudo systemctl restart nginx
+4. **Запустите приложение:**
+   Для Python (Django):
+   python manage.py migrate
+   python manage.py collectstatic
+   gunicorn my_project.wsgi:application --bind 0.0.0.0:8000
+
+## Шаг 7. Автоматизация деплоя (опционально)
+1. **Настройте автоматическое обновление кода:**
+   Добавьте скрипт для `git pull`:
+   ```bash
+   nano ~/deploy.sh
+   ```
+   Пример:
+   ```bash
+   #!/bin/bash
+   cd /var/www/my_project
+   git pull origin main
+   ```
+   Сделайте его исполняемым:
+   ```bash
+   chmod +x ~/deploy.sh
+   ```
+
+2. **Используйте Webhooks или Cron для автоматизации.**
+Для редактирования файла `sudoers` важно использовать специальную команду `visudo`, чтобы избежать ошибок конфигурации, которые могут привести к тому, что вы потеряете доступ к системе.
+
+Вот пошаговое руководство:
+
+---
+
+### 1. Открытие файла `sudoers` для редактирования
+Используйте команду:
+```bash
+sudo visudo
+```
+
+Эта команда открывает файл `/etc/sudoers` в текстовом редакторе (по умолчанию это `nano` или `vi`, в зависимости от системы). `visudo` проверяет синтаксис изменений перед их применением.
+
+---
+
+### 2. Основная структура файла
+В файле вы увидите примерно такой текст:
+```plaintext
+Defaults    env_reset
+Defaults    mail_badpass
+
+# User privilege specification
+root    ALL=(ALL:ALL) ALL
+
+# Members of the group 'sudo' may gain root privileges
+%sudo   ALL=(ALL:ALL) ALL
+```
+
+- `root    ALL=(ALL:ALL) ALL` — позволяет пользователю `root` выполнять все команды.
+- `%sudo   ALL=(ALL:ALL) ALL` — позволяет всем пользователям группы `sudo` выполнять команды от имени `root`.
+
+---
+
+### 3. Добавление правил для пользователя
+Если вы хотите разрешить пользователю выполнять команды без ввода пароля:
+
+#### Пример 1: Все команды без пароля
+Добавьте строку в файл:
+```plaintext
+username ALL=(ALL) NOPASSWD: ALL
+```
+Замените `username` на имя пользователя. Эта строка позволяет пользователю `username` выполнять любые команды без запроса пароля.
+
+---
+
+#### Пример 2: Разрешение только определённых команд
+Вы можете ограничить команды, которые пользователь может выполнять. Например:
+```plaintext
+username ALL=(ALL) NOPASSWD: /bin/systemctl, /usr/bin/apt
+```
+Это позволяет пользователю выполнять только `systemctl` и `apt` без ввода пароля.
+
+---
+
+### 4. Сохранение изменений
+1. Если используется `nano`:
+   - Нажмите `Ctrl+O` для сохранения изменений.
+   - Нажмите `Enter` для подтверждения имени файла.
+   - Нажмите `Ctrl+X` для выхода.
+
+2. Если используется `vi`:
+   - Нажмите `Esc`, затем введите `:wq` и нажмите `Enter`.
+
+---
+
+### 5. Проверка синтаксиса
+`visudo` автоматически проверяет синтаксис при сохранении. Если есть ошибка, она будет указана, и изменения не применятся.
+
+---
+
+### 6. Проверка работы
+Чтобы проверить, работает ли правило:
+- Выполните команду, которая требует `sudo`.
+- Например:
+  ```bash
+  sudo apt update
+  ```
+  Если правило настроено верно, команда выполнится без запроса пароля.
+
+---
+
+### 7. Удаление изменений
+Если вы хотите отменить изменения:
+- Снова откройте файл `sudoers` с помощью `visudo`.
+- Удалите добавленные строки.
+- Сохраните файл.
+
+---
+
+**Важное замечание**: 
+Никогда не редактируйте файл `/etc/sudoers` напрямую через обычный текстовый редактор (`nano`, `vi` и т. д.). Это может привести к ошибкам, которые сделают вашу систему неработоспособной. Всегда используйте `visudo`.
