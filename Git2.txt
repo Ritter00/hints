@@ -89,5 +89,6 @@ squash <commit-hash> Commit message 2
 squash <commit-hash> Commit message 3
 *********        	# Здесь первый коммит будет основным, а второй и третий объединятся с ним.
 После выбора squash Git откроет другой файл, где вы можете отредактировать итоговое сообщение коммита (оставить только одно)
-git push origin <branch_name> --force 	# не обязательно Если коммиты были отправлены на удалённый сервер, нужно принудительно обновить удалённую ветку
+git push origin feature/github-actions-deploy --force 	# не обязательно Если коммиты были отправлены на удалённый сервер, нужно принудительно обновить удалённую ветку
+git pull --rebase origin stage #feature/github-actions-deploy
 

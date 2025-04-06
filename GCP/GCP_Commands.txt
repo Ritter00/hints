@@ -1,2 +1,12 @@
-gcloud projects list		# view all projects
-gcloud auth list		# view all accountss
+gcloud projects list				# view all projects
+gcloud auth list				# view all accountss
+gcloud sql instances list
+gcloud sql instances describe platform-stage 	# view sql instance
+gcloud compute instances describe platform-stage-1 --format="get(serviceAccounts)"
+gcloud compute instances describe platform-stage-1 --format="json(networkInterfaces)"
+gcloud compute firewall-rules list --filter="network:core-internal"
+gcloud sql connect platform-stage --user=postgres --quiet
+gcloud sql instances list --filter="settings.ipConfiguration.privateNetwork=projects/revcore-1/global/networks/core-internal"
+gcloud compute routes list --filter="network=core-internal"
+gcloud compute networks subnets describe core-central1 --region=us-central1
+
