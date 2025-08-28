@@ -20,7 +20,16 @@ pip3 install django      	# устанавливаем Django
 django-admin startproject project    # создаем пустой проект с названием project или python -m django-admin startproject project
 django-admin startproject project .	# тоже, но сточкой создается в текущей папке
 python manage.py runserver 	# запускаем пустой проект  # в браузере http://127.0.0.1:8000/ (локальный серв или Вместо 127.0.0.1 можете также прописать localhost)
-python manage.py startapp news	# новое приложение news -добавить в установленные приложения settings.py и найдем там список INSTALLED_APPS
+python manage.py startapp news	# новое приложение news -добавить в установленные приложения settings.py и найдем там список INSTALLED_APPS+
+
+Poetry сам создаёт и использует окружение:
+poetry shell  			# активировать виртуальное окружение
+poetry run python  		# запустить python в окружении
+poetry run pytest  		# запустить любую команду
+poetry run python main.py 	# Запуск скрипта в окружении
+poetry install			# Установка всех зависимостей (как pip install -r)
+poetry update			# poetry update
+
 
 python3 manage.py makemigrations [<имя приложения>] 	# создание миграций (обратите внимание, что имя приложения — параметр необязательный, если его указать, то создаются только миграции для конкретного приложения)
 python3 manage.py migrate 	# применить созданные миграции, т.е. внести изменения уже именно в саму базу данных (создать новые или редактировать старые модели).

@@ -2,3 +2,7 @@ C:\Users\admin\AppData\Roaming>rd/S Docker		# удалить папку доке
 cd C:\Users\admin\AppData\Roaming
 rd/S Docker
 C:\Users\admin\.docker\features.json			# удалить
+
+docker system prune -a				# Удаление неиспользуемых данных
+wsl --shutdown
+Optimize-VHD -Path "C:\Users\admin\AppData\Local\Docker\wsl\disk\docker_data.vhdx" -Mode Full
